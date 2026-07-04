@@ -1,0 +1,19 @@
+# Next.js build and cache outputs
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Python environment and cache
+backend/venv/
+backend/.env
+backend/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+
+# OS metadata
+.DS_Store
+Thumbs.db
