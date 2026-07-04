@@ -1,0 +1,17 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-socketio==5.11.4
+python-multipart==0.0.17
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Auth
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Utilities
+python-dotenv==1.0.1
+aiofiles==24.1.0
