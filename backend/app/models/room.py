@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey, Text, func
+from sqlalchemy import String, Integer, BigInteger, Boolean, DateTime, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 
@@ -62,7 +62,7 @@ class CurrentSong(Base):
     # Playback state
     position_ms: Mapped[int] = mapped_column(Integer, default=0)
     is_playing: Mapped[bool] = mapped_column(Boolean, default=False)
-    server_timestamp: Mapped[int] = mapped_column(Integer, default=0)  # Unix ms
+    server_timestamp: Mapped[int] = mapped_column(BigInteger, default=0)  # Unix ms
     # Room mode
     mode: Mapped[str] = mapped_column(String(20), default="youtube")  # 'youtube' | 'screenshare'
     updated_at: Mapped[datetime] = mapped_column(
