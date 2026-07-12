@@ -141,6 +141,14 @@ export async function startScreenShare(socket: Socket, roomId: string): Promise<
     audio: { echoCancellation: false } as MediaTrackConstraints,
   });
 
+  // Immediately show the stream to the HOST in their own ScreenShareViewer
+  // (remote peers receive it via WebRTC track event, but the host needs this locally)
+  window.dispatchEvent(
+    new CustomEvent("screenshare-stream", {
+      detail: { stream: screenshareStream, sid: "local-host" },
+    })
+  );
+
   // Add screenshare track to all existing peers
   screenshareStream.getTracks().forEach((track) => {
     peers.forEach(({ peer }) => {
@@ -159,6 +167,7 @@ export async function startScreenShare(socket: Socket, roomId: string): Promise<
 export function stopScreenShare(socket: Socket) {
   screenshareStream?.getTracks().forEach((t) => t.stop());
   screenshareStream = null;
+  window.dispatchEvent(new CustomEvent("screenshare-ended"));
   socket.emit("screenshare_ended", {});
 }
 

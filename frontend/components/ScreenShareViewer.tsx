@@ -14,10 +14,16 @@ export default function ScreenShareViewer() {
       setStream(customEvent.detail.stream);
     };
 
+    const handleEnded = () => {
+      setStream(null);
+    };
+
     window.addEventListener("screenshare-stream", handleStream);
+    window.addEventListener("screenshare-ended", handleEnded);
 
     return () => {
       window.removeEventListener("screenshare-stream", handleStream);
+      window.removeEventListener("screenshare-ended", handleEnded);
     };
   }, []);
 

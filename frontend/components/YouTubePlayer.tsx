@@ -120,20 +120,25 @@ export default function YouTubePlayer() {
   useEffect(() => {
     if (!playerReady || !playerRef.current) return;
 
-    const syncPlayer = async () => {
-      isSyncingRef.current = true;
+    // Set syncing flag synchronously BEFORE any player operation,
+    // so onStateChange does not fire spurious host_pause/host_play events.
+    isSyncingRef.current = true;
 
+    const syncPlayer = async () => {
       const loadedVideoId = playerRef.current.getVideoData?.()?.video_id;
       const targetVideoId = currentSong.video_id;
 
       // 1. Handle song change
       if (targetVideoId && loadedVideoId !== targetVideoId) {
+        // cueVideoById triggers PAUSED state — isSyncingRef guards against
+        // the onStateChange handler broadcasting a spurious host_pause.
         playerRef.current.cueVideoById(targetVideoId);
       }
 
       if (!targetVideoId) {
         playerRef.current.stopVideo();
-        isSyncingRef.current = false;
+        // Hold the flag a moment so the resulting state change is swallowed
+        setTimeout(() => { isSyncingRef.current = false; }, 500);
         return;
       }
 
@@ -158,7 +163,8 @@ export default function YouTubePlayer() {
         playerRef.current.pauseVideo();
       }
 
-      isSyncingRef.current = false;
+      // Release the sync lock after a short delay so player state changes settle
+      setTimeout(() => { isSyncingRef.current = false; }, 500);
     };
 
     syncPlayer();

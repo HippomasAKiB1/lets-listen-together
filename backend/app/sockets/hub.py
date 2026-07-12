@@ -7,6 +7,7 @@ Socket.io event hub — manages all real-time communication:
 - Text chat
 """
 
+import asyncio
 import time
 import socketio
 from sqlalchemy import select, delete
@@ -26,6 +27,9 @@ room_sessions: dict[str, dict[str, dict]] = {}
 
 # SID → room_id lookup for disconnect cleanup
 sid_to_room: dict[str, str] = {}
+
+# Pending host-disconnect tasks: room_id → asyncio.Task (grace period)
+_host_disconnect_tasks: dict[str, asyncio.Task] = {}
 
 
 def _get_members_list(room_id: str) -> list[dict]:
@@ -149,20 +153,37 @@ async def disconnect(sid):
         is_host = room and room.host_id == user_info["user_id"]
 
         if is_host:
-            # End the room
-            if room:
-                room.is_active = False
-                db.add(room)
-            # Remove all room_member rows
-            await db.execute(delete(RoomMember).where(RoomMember.room_id == room_id))
-            await db.commit()
+            # Give the host a 12-second grace period to reconnect (e.g. page refresh)
+            # Cancel any existing task for this room first
+            existing_task = _host_disconnect_tasks.pop(room_id, None)
+            if existing_task and not existing_task.done():
+                existing_task.cancel()
 
-            await sio.emit(
-                "room_ended",
-                {"reason": "Host left the room"},
-                room=room_id,
-            )
-            room_sessions.pop(room_id, None)
+            async def _end_room_after_grace(rid: str, uid: str):
+                await asyncio.sleep(12)
+                # Check if host reconnected (any session with same user_id)
+                sessions = room_sessions.get(rid, {})
+                reconnected = any(
+                    info["user_id"] == uid for info in sessions.values()
+                )
+                if reconnected:
+                    _host_disconnect_tasks.pop(rid, None)
+                    return
+                # Actually end the room
+                async with AsyncSessionLocal() as db2:
+                    r2 = await db2.execute(select(Room).where(Room.room_id == rid))
+                    room2 = r2.scalar_one_or_none()
+                    if room2:
+                        room2.is_active = False
+                        db2.add(room2)
+                    await db2.execute(delete(RoomMember).where(RoomMember.room_id == rid))
+                    await db2.commit()
+                await sio.emit("room_ended", {"reason": "Host left the room"}, room=rid)
+                room_sessions.pop(rid, None)
+                _host_disconnect_tasks.pop(rid, None)
+
+            task = asyncio.create_task(_end_room_after_grace(room_id, user_info["user_id"]))
+            _host_disconnect_tasks[room_id] = task
         else:
             # Remove from DB
             await db.execute(
