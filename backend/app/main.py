@@ -13,6 +13,17 @@ load_dotenv()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+# Normalize origins to prevent CORS issues with trailing slashes
+origins = [FRONTEND_URL, "http://localhost:3000", "http://localhost:3001"]
+allowed_origins = []
+for o in origins:
+    if o:
+        allowed_origins.append(o)
+        if o.endswith("/"):
+            allowed_origins.append(o.rstrip("/"))
+        else:
+            allowed_origins.append(o + "/")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,7 +40,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:3000", "http://localhost:3001"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
