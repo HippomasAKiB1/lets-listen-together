@@ -1,4 +1,5 @@
 import os
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
@@ -47,3 +48,9 @@ async def init_db():
     """Create all tables on startup."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Migrate server_timestamp to BIGINT if it is still an INTEGER (useful for Supabase)
+        try:
+            await conn.execute(text("ALTER TABLE current_song ALTER COLUMN server_timestamp TYPE BIGINT;"))
+        except Exception:
+            # Pass silently (e.g. SQLite doesn't support ALTER COLUMN type syntax)
+            pass
