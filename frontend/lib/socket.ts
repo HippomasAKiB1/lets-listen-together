@@ -6,8 +6,14 @@ const BACKEND_URL =
 let socket: Socket | null = null;
 
 export function getSocket(token: string, roomId: string): Socket {
-  if (socket?.connected) {
-    return socket;
+  if (socket) {
+    const currentQuery = (socket.io.opts as any)?.query;
+    const currentAuth = (socket.io.opts as any)?.auth;
+    if (socket.connected && currentQuery?.room_id === roomId && currentAuth?.token === token) {
+      return socket;
+    }
+    socket.disconnect();
+    socket = null;
   }
 
   socket = io(BACKEND_URL, {

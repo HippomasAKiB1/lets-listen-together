@@ -14,7 +14,13 @@ load_dotenv()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # Normalize origins to prevent CORS issues with trailing slashes
-origins = [FRONTEND_URL, "http://localhost:3000", "http://localhost:3001"]
+origins = [
+    FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+]
 allowed_origins = []
 for o in origins:
     if o:

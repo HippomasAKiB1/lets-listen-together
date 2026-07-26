@@ -99,6 +99,12 @@ async def connect(sid, environ, auth):
         )
         room = room_result.scalar_one_or_none()
 
+        # If host reconnected, cancel any pending host-disconnect grace timer
+        if room and user["user_id"] == room.host_id:
+            existing_task = _host_disconnect_tasks.pop(room_id, None)
+            if existing_task and not existing_task.done():
+                existing_task.cancel()
+
     await sio.emit(
         "sync_state",
         {
@@ -153,14 +159,14 @@ async def disconnect(sid):
         is_host = room and room.host_id == user_info["user_id"]
 
         if is_host:
-            # Give the host a 12-second grace period to reconnect (e.g. page refresh)
+            # Give the host a 300-second grace period to reconnect (e.g. page refresh, tab switch, sharing code)
             # Cancel any existing task for this room first
             existing_task = _host_disconnect_tasks.pop(room_id, None)
             if existing_task and not existing_task.done():
                 existing_task.cancel()
 
             async def _end_room_after_grace(rid: str, uid: str):
-                await asyncio.sleep(12)
+                await asyncio.sleep(300)
                 # Check if host reconnected (any session with same user_id)
                 sessions = room_sessions.get(rid, {})
                 reconnected = any(

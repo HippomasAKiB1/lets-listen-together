@@ -99,18 +99,18 @@ async def join_room(
         if not body.password or not pwd_context.verify(body.password, room.password_hash):
             raise HTTPException(status_code=403, detail="Incorrect password")
 
-    # Check capacity (count current members from WebSocket hub / DB)
+    # Check capacity & current members
     members_result = await db.execute(
-        select(RoomMember, User)
-        .join(User, RoomMember.user_id == User.user_id)
+        select(User)
+        .join(RoomMember, RoomMember.user_id == User.user_id)
         .where(RoomMember.room_id == room.room_id)
     )
-    member_rows = members_result.all()
+    users = members_result.scalars().all()
 
     # Check if already a member
-    existing_ids = {row.User.user_id for row in member_rows}
+    existing_ids = {u.user_id for u in users}
     if current_user["user_id"] not in existing_ids:
-        if len(member_rows) >= room.max_members:
+        if len(users) >= room.max_members:
             raise HTTPException(status_code=409, detail="Room is full")
         # Add member
         new_member = RoomMember(room_id=room.room_id, user_id=current_user["user_id"])
@@ -118,15 +118,15 @@ async def join_room(
         await db.commit()
         # Reload members
         members_result = await db.execute(
-            select(RoomMember, User)
-            .join(User, RoomMember.user_id == User.user_id)
+            select(User)
+            .join(RoomMember, RoomMember.user_id == User.user_id)
             .where(RoomMember.room_id == room.room_id)
         )
-        member_rows = members_result.all()
+        users = members_result.scalars().all()
 
     members: List[MemberInfo] = [
-        MemberInfo(user_id=row.User.user_id, username=row.User.username)
-        for row in member_rows
+        MemberInfo(user_id=u.user_id, username=u.username)
+        for u in users
     ]
 
     # Get current song

@@ -42,7 +42,16 @@ export default function JoinRoomPage() {
         setPasswordRequired(true);
         setError("Password is required for this room.");
       } else {
-        setError(err?.response?.data?.detail || "Failed to join room. Please check the code.");
+        const detail = err?.response?.data?.detail;
+        let msg = "Failed to join room. Please check the code.";
+        if (typeof detail === "string") {
+          msg = detail;
+        } else if (Array.isArray(detail) && detail.length > 0) {
+          msg = detail[0]?.msg || msg;
+        } else if (err?.message && !err?.response) {
+          msg = "Network error. Please make sure the backend server is running.";
+        }
+        setError(msg);
       }
     } finally {
       setLoading(false);
