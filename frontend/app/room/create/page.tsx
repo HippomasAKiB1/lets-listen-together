@@ -36,7 +36,16 @@ export default function CreateRoomPage() {
       });
       setCreatedRoom(res.data);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Failed to create room. Please try again.");
+      const detail = err?.response?.data?.detail;
+      let msg = "Failed to create room. Please try again.";
+      if (typeof detail === "string") {
+        msg = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        msg = detail[0]?.msg || msg;
+      } else if (err?.message && !err?.response) {
+        msg = "Network error. Please make sure the backend server is running.";
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
