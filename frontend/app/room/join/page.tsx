@@ -38,11 +38,13 @@ export default function JoinRoomPage() {
       // Navigate to the room page
       router.push(`/room?id=${res.data.room_id}`);
     } catch (err: any) {
-      if (err?.response?.status === 403) {
+      const detail = err?.response?.data?.detail;
+      if (err?.response?.status === 401 || detail === "Not authenticated") {
+        setError("Session expired or not authenticated. Please log in again.");
+      } else if (err?.response?.status === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
         setPasswordRequired(true);
         setError("Password is required for this room.");
       } else {
-        const detail = err?.response?.data?.detail;
         let msg = "Failed to join room. Please check the code.";
         if (typeof detail === "string") {
           msg = detail;

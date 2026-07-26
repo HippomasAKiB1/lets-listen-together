@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "https://tunetogether-backend.onrender.com";
+  (process.env.NEXT_PUBLIC_BACKEND_URL || "https://tunetogether-backend.onrender.com").replace(/\/+$/, "");
 
 let socket: Socket | null = null;
 
