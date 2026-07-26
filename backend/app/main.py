@@ -11,24 +11,27 @@ from app.sockets.hub import sio
 
 load_dotenv()
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-
-# Normalize origins to prevent CORS issues with trailing slashes
-origins = [
-    FRONTEND_URL,
+# Configure CORS for different frontend deployments
+RENDER_FRONTEND_URL = os.getenv("FRONTEND_URL", "https://tunetogether-six.vercel.app")
+ALLOWED_FRONTEND_URLS = [
+    "https://tunetogether-six.vercel.app",  # Vercel frontend
+    "https://tunetogether.vercel.app",      # Alternative Vercel frontend
+    RENDER_FRONTEND_URL,                    # Render's FRONTEND_URL config (if set to frontend)
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
 ]
-allowed_origins = []
-for o in origins:
+
+# Normalize origins to prevent CORS issues with trailing slashes
+origins = []
+for o in ALLOWED_FRONTEND_URLS:
     if o:
-        allowed_origins.append(o)
+        origins.append(o)
         if o.endswith("/"):
-            allowed_origins.append(o.rstrip("/"))
+            origins.append(o.rstrip("/"))
         else:
-            allowed_origins.append(o + "/")
+            origins.append(o + "/")
 
 
 @asynccontextmanager
@@ -46,7 +49,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://.*",
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

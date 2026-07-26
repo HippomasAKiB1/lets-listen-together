@@ -17,3 +17,6 @@ backend/.pytest_cache/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+#claude
+.claude/settings.json
