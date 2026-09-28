@@ -326,10 +326,10 @@ function RoomContent() {
             fontWeight: 700,
             marginBottom: "16px",
           }}>
-            INITIALIZING SESSION [{roomId}]<span className="cursor-blink">_</span>
+            LOADING ROOM...<span className="cursor-blink">_</span>
           </div>
           <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--muted)" }}>
-            ESTABLISHING WEBRTC AUDIO MESH & SYNCING QUEUE…
+            CONNECTING TO AUDIO & QUEUE…
           </p>
         </div>
       </div>
@@ -359,24 +359,14 @@ function RoomContent() {
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            background: "var(--accent)",
-            border: "1px solid #FFFFFF",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "32px",
-            height: "32px",
-          }}>
-            <Image
-              src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER"
-              width={22}
-              height={22}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+          <Image
+            src="/assets/app-logo-trans.png"
+            alt="TuneTogether"
+            width={96}
+            height={36}
+            priority
+            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+          />
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <h2 style={{
@@ -410,7 +400,7 @@ function RoomContent() {
                     style={{ padding: "1px 6px", fontSize: "10px", height: "auto" }}
                     title="COPY INVITE CODE"
                   >
-                    {copiedCode ? "[✓] COPIED" : "COPY CODE"}
+                    {copiedCode ? "COPIED" : "COPY CODE"}
                   </button>
                   <button
                     onClick={handleCopyLink}
@@ -418,7 +408,7 @@ function RoomContent() {
                     style={{ padding: "1px 8px", fontSize: "10px", height: "auto" }}
                     title="COPY DIRECT JOIN LINK"
                   >
-                    {copiedLink ? "[✓] LINK COPIED" : "COPY LINK"}
+                    {copiedLink ? "LINK COPIED" : "COPY LINK"}
                   </button>
                 </>
               )}
@@ -427,7 +417,7 @@ function RoomContent() {
         </div>
 
         <button onClick={handleLeaveRoom} className="btn btn-danger btn-sm">
-          {isHost ? "END ROOM [x]" : "LEAVE ROOM [x]"}
+          {isHost ? "END ROOM" : "LEAVE ROOM"}
         </button>
       </header>
 
@@ -477,11 +467,11 @@ function RoomContent() {
                 id="footer-mute"
                 style={{ padding: "6px 12px", fontSize: "11px" }}
               >
-                {micMuted ? "MIC MUTED [OFF]" : "MIC BROADCASTING [ON]"}
+                {micMuted ? "MIC OFF" : "MIC ON"}
               </button>
               {micError && (
                 <span style={{ fontSize: "11px", color: "var(--error)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-                  [MIC_DENIED]
+                  MIC ACCESS DENIED
                 </span>
               )}
             </div>
@@ -521,7 +511,7 @@ function RoomContent() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <QueuePanel />
               <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--muted)" }}>
-                TUNETOGETHER // STEREO
+                TUNETOGETHER
               </span>
             </div>
           </footer>

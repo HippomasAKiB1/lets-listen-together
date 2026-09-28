@@ -95,7 +95,7 @@ export default function MusicControls() {
           <input
             className="input"
             type="text"
-            placeholder="SEARCH YOUTUBE ARCHIVE..."
+            placeholder="SEARCH YOUTUBE..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsOpen(true)}
@@ -118,12 +118,12 @@ export default function MusicControls() {
                 background: "var(--surface)",
               }}
             >
-              [X]
+              ✕
             </button>
           )}
         </div>
         <button type="submit" className="btn btn-primary btn-sm" disabled={loading} id="music-search-submit">
-          {loading ? "QUERYING..." : "SEARCH [→]"}
+          {loading ? "SEARCHING..." : "SEARCH"}
         </button>
       </form>
 
@@ -197,7 +197,7 @@ export default function MusicControls() {
                     style={{ fontSize: "10px", padding: "3px 8px" }}
                     title="ADD TO QUEUE"
                   >
-                    QUEUE [+]
+                    QUEUE +
                   </button>
                   <button
                     type="button"
@@ -206,7 +206,7 @@ export default function MusicControls() {
                     style={{ fontSize: "10px", padding: "3px 8px" }}
                     title="PLAY IMMEDIATELY"
                   >
-                    PLAY [▶]
+                    PLAY ▶
                   </button>
                 </div>
               </div>

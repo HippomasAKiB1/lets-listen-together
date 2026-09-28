@@ -53,18 +53,16 @@ function LoginContent() {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            border: "var(--border)",
-            boxShadow: "var(--shadow-hard)",
-            padding: "8px",
+            padding: "12px 24px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER LOGO"
-              width={48}
-              height={48}
+              alt="TuneTogether"
+              width={160}
+              height={56}
               priority
-              style={{ objectFit: "contain" }}
+              style={{ height: "56px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -77,7 +75,7 @@ function LoginContent() {
             fontFamily: "var(--font-mono)",
             fontWeight: 700,
           }}>
-            AUTHENTICATION GATEWAY // SECURE SESSION
+            SIGN IN TO CONTINUE
           </p>
         </div>
 
@@ -96,9 +94,6 @@ function LoginContent() {
             <h2 style={{ fontSize: "18px", letterSpacing: "-0.02em" }}>
               SIGN IN
             </h2>
-            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent)" }}>
-              [AUTH_REQ]
-            </span>
           </div>
 
           {/* Invite Alert Strip */}
@@ -117,8 +112,7 @@ function LoginContent() {
               alignItems: "center",
               gap: "8px",
             }}>
-              <span>[!]</span>
-              <span>INVITATION ACTIVE. SIGN IN TO ENTER ROOM.</span>
+              <span>INVITE DETECTED — SIGN IN TO JOIN</span>
             </div>
           )}
 
@@ -176,7 +170,7 @@ function LoginContent() {
               id="login-submit"
               style={{ width: "100%", marginTop: "6px", padding: "14px" }}
             >
-              {loading ? "AUTHENTICATING…" : "SIGN IN [→]"}
+              {loading ? "SIGNING IN…" : "SIGN IN →"}
             </button>
           </form>
 

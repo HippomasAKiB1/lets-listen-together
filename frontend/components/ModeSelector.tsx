@@ -65,7 +65,7 @@ export default function ModeSelector() {
           disabled={isHost ? false : isScreenshare}
           id="mode-youtube"
         >
-          [▶] YOUTUBE SYNC
+          YOUTUBE SYNC
         </button>
         <button
           onClick={() => handleToggleMode("screenshare")}
@@ -74,7 +74,7 @@ export default function ModeSelector() {
           disabled={isHost ? false : !isScreenshare}
           id="mode-screenshare"
         >
-          [🖥] SCREENSHARE
+          SCREENSHARE
         </button>
       </div>
       
@@ -84,7 +84,7 @@ export default function ModeSelector() {
         </span>
       ) : (
         <span style={{ fontSize: "10px", color: "var(--muted)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-          {isHost ? "HOST CONTROLS ACTIVE" : "PLAYBACK CONTROLLED BY HOST"}
+          {isHost ? "HOST CONTROLS" : "CONTROLLED BY HOST"}
         </span>
       )}
     </div>

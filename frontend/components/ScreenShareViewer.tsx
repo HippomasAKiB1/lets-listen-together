@@ -65,10 +65,10 @@ export default function ScreenShareViewer() {
           boxShadow: "var(--shadow-hard)",
         }}>
           <h3 style={{ color: "var(--ink)", marginBottom: "6px", fontSize: "14px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-            [AWAITING SCREEN TRANSMISSION]
+            WAITING FOR SCREEN SHARE
           </h3>
           <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
-            THE HOST HAS INITIALIZED SCREENSHARE MODE. DISPLAY STREAM WILL RENDER ONCE BROADCAST BEGINS.
+            THE HOST HAS SWITCHED TO SCREENSHARE MODE. DISPLAY WILL APPEAR ONCE SHARING STARTS.
           </p>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function ScreenShareViewer() {
         pointerEvents: "none",
       }}>
         <span style={{ width: "8px", height: "8px", background: "var(--error)", display: "inline-block" }} />
-        LIVE SCREENSHARE STREAM
+        LIVE SCREENSHARE
       </div>
     </div>
   );

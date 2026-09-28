@@ -113,7 +113,7 @@ function JoinRoomContent() {
           className="btn btn-ghost btn-sm"
           style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
         >
-          <span>←</span> BACK TO HUB
+          <span>←</span> BACK TO HOME
         </Link>
 
         <div className="card" style={{ padding: "32px 28px" }}>
@@ -129,10 +129,10 @@ function JoinRoomContent() {
                 fontWeight: 700,
                 marginBottom: "16px",
               }}>
-                CONNECTING TO [{codeParam}]<span className="cursor-blink">_</span>
+                JOINING ROOM...<span className="cursor-blink">_</span>
               </div>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
-                AUTHENTICATING INVITATION & SYNCHRONIZING ENGINE…
+                CONNECTING TO ROOM…
               </p>
             </div>
           ) : (
@@ -151,23 +151,23 @@ function JoinRoomContent() {
                     JOIN A ROOM
                   </h2>
                   <p style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "var(--font-mono)", fontWeight: 700, marginTop: "2px" }}>
-                    INPUT 5-CHARACTER INVITATION TOKEN
+                    ENTER 5-CHARACTER CODE
                   </p>
                 </div>
                 <div style={{
                   background: "var(--ink)",
-                  padding: "4px",
+                  padding: "6px 14px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "var(--border-thin)",
                 }}>
                   <Image
                     src="/assets/app-logo-trans.png"
-                    alt="TUNETOGETHER LOGO"
-                    width={28}
-                    height={28}
-                    style={{ objectFit: "contain" }}
+                    alt="TuneTogether"
+                    width={80}
+                    height={32}
+                    priority
+                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
                   />
                 </div>
               </div>
@@ -235,7 +235,7 @@ function JoinRoomContent() {
                   id="join-room-submit"
                   style={{ width: "100%", marginTop: "6px", padding: "14px" }}
                 >
-                  {loading ? "AUTHENTICATING JOIN…" : "ENTER ROOM [→]"}
+                  {loading ? "JOINING ROOM…" : "JOIN ROOM →"}
                 </button>
               </form>
             </>

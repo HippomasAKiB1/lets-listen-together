@@ -103,7 +103,7 @@ export default function QueuePanel() {
             marginBottom: "12px",
           }}>
             <h4 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, margin: 0 }}>
-              UP NEXT QUEUE [{queue.length}]
+              QUEUE ({queue.length})
             </h4>
             <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
               {isHost && queue.length > 0 && (
@@ -120,7 +120,7 @@ export default function QueuePanel() {
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: "11px", padding: "2px 6px" }}
               >
-                [X]
+                ✕
               </button>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function QueuePanel() {
                 margin: "12px 0",
               }}>
                 NO TRACKS IN QUEUE.<br />
-                {isHost ? "SEARCH A SONG TO QUEUE." : "WAITING FOR HOST TO QUEUE."}
+                {isHost ? "SEARCH FOR A SONG TO ADD TO QUEUE." : "WAITING FOR TRACKS TO BE ADDED."}
               </div>
             ) : (
               queue.map((item, idx) => (

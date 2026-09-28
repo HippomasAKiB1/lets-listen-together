@@ -53,11 +53,8 @@ export default function MemberList() {
         alignItems: "center",
       }}>
         <h3 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em" }}>
-          MEMBERS [{members.length}]
+          MEMBERS ({members.length})
         </h3>
-        <span style={{ fontSize: "10px", color: "var(--accent-alt)", fontFamily: "var(--font-mono)" }}>
-          MESH ACTIVE
-        </span>
       </div>
 
       {/* Members Table-Style Rows */}
@@ -113,7 +110,7 @@ export default function MemberList() {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}>
-                    {member.username} {isSelf && "[YOU]"}
+                    {member.username} {isSelf && "(YOU)"}
                   </span>
 
                   {isMemberHost && (
@@ -127,7 +124,7 @@ export default function MemberList() {
                       width: "fit-content",
                       marginTop: "2px",
                     }}>
-                      ROOM HOST
+                      HOST
                     </span>
                   )}
                 </div>
@@ -184,14 +181,14 @@ export default function MemberList() {
                           className="btn btn-ghost btn-sm"
                           style={{ justifyContent: "flex-start", fontSize: "11px", padding: "6px 8px" }}
                         >
-                          MAKE HOST [👑]
+                          MAKE HOST
                         </button>
                         <button
                           onClick={() => handleKickMember(member.user_id, member.username)}
                           className="btn btn-ghost btn-sm"
                           style={{ justifyContent: "flex-start", fontSize: "11px", padding: "6px 8px", color: "var(--error)" }}
                         >
-                          REMOVE [✕]
+                          REMOVE MEMBER
                         </button>
                       </div>
                     )}

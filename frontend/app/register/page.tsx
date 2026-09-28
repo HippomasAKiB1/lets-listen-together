@@ -60,18 +60,16 @@ function RegisterContent() {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            border: "var(--border)",
-            boxShadow: "var(--shadow-hard)",
-            padding: "8px",
+            padding: "12px 24px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER LOGO"
-              width={48}
-              height={48}
+              alt="TuneTogether"
+              width={160}
+              height={56}
               priority
-              style={{ objectFit: "contain" }}
+              style={{ height: "56px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -84,7 +82,7 @@ function RegisterContent() {
             fontFamily: "var(--font-mono)",
             fontWeight: 700,
           }}>
-            NEW ACCOUNT REGISTRATION // PROTOCOL ENTRY
+            CREATE A NEW ACCOUNT
           </p>
         </div>
 
@@ -103,9 +101,6 @@ function RegisterContent() {
             <h2 style={{ fontSize: "18px", letterSpacing: "-0.02em" }}>
               CREATE ACCOUNT
             </h2>
-            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent)" }}>
-              [REG_01]
-            </span>
           </div>
 
           {/* Invite Alert Strip */}
@@ -124,8 +119,7 @@ function RegisterContent() {
               alignItems: "center",
               gap: "8px",
             }}>
-              <span>[!]</span>
-              <span>INVITATION ACTIVE. REGISTER TO JOIN ROOM.</span>
+              <span>INVITE DETECTED — SIGN IN TO JOIN</span>
             </div>
           )}
 
@@ -196,7 +190,7 @@ function RegisterContent() {
               id="register-submit"
               style={{ width: "100%", marginTop: "6px", padding: "14px" }}
             >
-              {loading ? "CREATING PROFILE…" : "CREATE ACCOUNT [→]"}
+              {loading ? "CREATING PROFILE…" : "CREATE ACCOUNT →"}
             </button>
           </form>
 

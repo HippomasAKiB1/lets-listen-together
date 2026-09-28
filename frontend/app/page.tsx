@@ -16,12 +16,12 @@ export default function LandingPage() {
   const loggedIn = mounted && isAuthenticated();
 
   const mosaicTiles = [
-    { num: "01", tag: "VINYL // LP", title: "DAFT PUNK", sub: "RANDOM ACCESS MEMORIES", bg: "var(--accent-alt)", color: "#0A0A0A" },
-    { num: "02", tag: "LIVE // TOUR", title: "THE WEEKND", sub: "AFTER HOURS AT SOFI", bg: "#0A0A0A", color: "#F2EFE6" },
-    { num: "03", tag: "CINEMA // OST", title: "DUNE: PART TWO", sub: "HANS ZIMMER SCORE", bg: "var(--accent)", color: "#FFFFFF" },
-    { num: "04", tag: "BROADCAST", title: "RADIOHEAD", sub: "IN RAINBOWS BASEMENT", bg: "#FFFFFF", color: "#0A0A0A" },
-    { num: "05", tag: "SYMPHONY", title: "INTERSTELLAR", sub: "ROYAL ALBERT HALL LIVE", bg: "var(--signal-blue)", color: "#FFFFFF" },
-    { num: "06", tag: "ARCHIVE // 98", title: "BLONDE", sub: "FRANK OCEAN REISSUE", bg: "#E8E4D9", color: "#0A0A0A" },
+    { tag: "VINYL", title: "DAFT PUNK", sub: "RANDOM ACCESS MEMORIES", bg: "var(--accent-alt)", color: "#0A0A0A" },
+    { tag: "CONCERT", title: "THE WEEKND", sub: "AFTER HOURS AT SOFI", bg: "#0A0A0A", color: "#F2EFE6" },
+    { tag: "SOUNDTRACK", title: "DUNE: PART TWO", sub: "HANS ZIMMER SCORE", bg: "var(--accent)", color: "#FFFFFF" },
+    { tag: "SESSION", title: "RADIOHEAD", sub: "IN RAINBOWS BASEMENT", bg: "#FFFFFF", color: "#0A0A0A" },
+    { tag: "LIVE", title: "INTERSTELLAR", sub: "ROYAL ALBERT HALL LIVE", bg: "var(--signal-blue)", color: "#FFFFFF" },
+    { tag: "ALBUM", title: "BLONDE", sub: "FRANK OCEAN REISSUE", bg: "#E8E4D9", color: "#0A0A0A" },
   ];
 
   return (
@@ -42,33 +42,22 @@ export default function LandingPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 20px",
+        padding: "0 24px",
         background: "var(--ink)",
         color: "var(--ink-light)",
         borderBottom: "var(--border)",
         flexShrink: 0,
       }}>
         {/* Left Brand Lockup */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            background: "var(--accent)",
-            border: "1px solid #FFFFFF",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "32px",
-            height: "32px",
-          }}>
-            <Image
-              src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER LOGO"
-              width={24}
-              height={24}
-              priority
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+          <Image
+            src="/assets/app-logo-trans.png"
+            alt="TuneTogether"
+            width={96}
+            height={36}
+            priority
+            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+          />
           <span style={{
             fontFamily: "var(--font-display)",
             fontSize: "18px",
@@ -78,27 +67,17 @@ export default function LandingPage() {
           }}>
             TUNETOGETHER
           </span>
-          <span style={{
-            fontSize: "11px",
-            fontFamily: "var(--font-mono)",
-            background: "var(--accent-alt)",
-            color: "#0A0A0A",
-            padding: "2px 6px",
-            fontWeight: "700",
-          }}>
-            SYS_REV.26
-          </span>
-        </div>
+        </Link>
 
         {/* Right Auth Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {loggedIn ? (
             <>
-              <span style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--accent-alt)" }}>
-                USER: [{username}]
+              <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--accent-alt)", fontWeight: 700 }}>
+                SIGNED IN AS {username}
               </span>
               <Link href="/home" className="btn btn-secondary btn-sm" id="landing-home-btn">
-                DASHBOARD [→]
+                DASHBOARD →
               </Link>
             </>
           ) : (
@@ -133,7 +112,6 @@ export default function LandingPage() {
           background: "var(--bg)",
           overflowY: "auto",
         }}>
-          {/* Header Metadata */}
           <div>
             <div style={{
               display: "flex",
@@ -146,26 +124,26 @@ export default function LandingPage() {
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
             }}>
-              <span>[INDEX // AUDIO_SYNC]</span>
-              <span style={{ color: "var(--accent)" }}>● ACTIVE TRANSMISSION</span>
+              <span>SYNCHRONIZED AUDIO & VIDEO</span>
+              <span style={{ color: "var(--accent)" }}>LIVE STREAMING</span>
             </div>
 
-            {/* Massive Display Headline */}
+            {/* Headline */}
             <h1 style={{
-              fontSize: "clamp(40px, 5.2vw, 68px)",
-              lineHeight: "0.92",
+              fontSize: "clamp(38px, 5vw, 64px)",
+              lineHeight: "0.95",
               letterSpacing: "-0.04em",
               marginBottom: "20px",
               color: "var(--ink)",
             }}>
-              LISTEN.<br />
-              WATCH.<br />
+              LISTEN TOGETHER.<br />
+              WATCH TOGETHER.<br />
               <span style={{ background: "var(--ink)", color: "var(--accent-alt)", padding: "0 6px" }}>
-                SYNCHRONIZE.
+                IN REAL TIME.
               </span>
             </h1>
 
-            {/* Structured Subheadline Card */}
+            {/* Plain Subheadline Card */}
             <div style={{
               background: "var(--surface)",
               border: "var(--border)",
@@ -180,7 +158,7 @@ export default function LandingPage() {
                 fontWeight: "700",
                 color: "var(--ink)",
               }}>
-                REAL-TIME SYNCHRONIZED STREAMING ROOMS WITH FRIENDS. DRIFT-CORRECTED PLAYBACK, WEBRTC MESH VOICE, AND SHARED YOUTUBE QUEUES.
+                CREATE A ROOM WITH FRIENDS. SYNC YOUTUBE PLAYBACK DOWN TO THE MILLISECOND, TALK OVER LIVE VOICE, AND SHARE THE UP-NEXT QUEUE.
               </p>
             </div>
 
@@ -189,16 +167,16 @@ export default function LandingPage() {
               {loggedIn ? (
                 <>
                   <Link href="/room/create" className="btn btn-primary btn-lg" id="landing-create-cta">
-                    CREATE ROOM [→]
+                    CREATE ROOM →
                   </Link>
                   <Link href="/room/join" className="btn btn-outline btn-lg" id="landing-join-cta">
-                    JOIN WITH CODE
+                    JOIN ROOM
                   </Link>
                 </>
               ) : (
                 <>
                   <Link href="/register" className="btn btn-primary btn-lg" id="landing-get-started-cta">
-                    CREATE ACCOUNT [→]
+                    GET STARTED →
                   </Link>
                   <Link href="/room/join" className="btn btn-outline btn-lg" id="landing-join-cta">
                     JOIN A ROOM
@@ -208,7 +186,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Bottom 3-Card Spec Strip */}
+          {/* Bottom 3 Real Feature Strips */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
@@ -217,15 +195,15 @@ export default function LandingPage() {
             color: "var(--ink-light)",
           }}>
             <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)" }}>
-              <span style={{ fontSize: "10px", color: "var(--accent-alt)", display: "block" }}>SPEC.01</span>
-              <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>SUB-SECOND SYNC</strong>
+              <span style={{ fontSize: "10px", color: "var(--accent-alt)", display: "block" }}>PLAYBACK</span>
+              <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>REAL-TIME SYNC</strong>
             </div>
             <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)" }}>
-              <span style={{ fontSize: "10px", color: "var(--accent)", display: "block" }}>SPEC.02</span>
-              <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>WEBRTC VOICE</strong>
+              <span style={{ fontSize: "10px", color: "var(--accent)", display: "block" }}>AUDIO</span>
+              <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>VOICE CHAT</strong>
             </div>
             <div style={{ padding: "10px 12px" }}>
-              <span style={{ fontSize: "10px", color: "var(--accent-alt)", display: "block" }}>SPEC.03</span>
+              <span style={{ fontSize: "10px", color: "var(--accent-alt)", display: "block" }}>PLAYLIST</span>
               <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>SHARED QUEUE</strong>
             </div>
           </div>
@@ -255,17 +233,7 @@ export default function LandingPage() {
                 border: "1px solid #0A0A0A",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <span style={{
-                  fontSize: "11px",
-                  fontWeight: 900,
-                  fontFamily: "var(--font-mono)",
-                  background: "#0A0A0A",
-                  color: "#FFFFFF",
-                  padding: "2px 6px",
-                }}>
-                  {tile.num}
-                </span>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <span style={{
                   fontSize: "10px",
                   fontWeight: 700,
@@ -302,7 +270,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* ── BOTTOM METADATA TICKER BAR ── */}
+      {/* ── BOTTOM STATIC FOOTER BAR ── */}
       <footer style={{
         height: "36px",
         background: "var(--accent-alt)",
@@ -311,18 +279,15 @@ export default function LandingPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 20px",
+        padding: "0 24px",
         fontSize: "11px",
         fontFamily: "var(--font-mono)",
         fontWeight: "700",
         letterSpacing: "0.04em",
         flexShrink: 0,
       }}>
-        <span>TUNETOGETHER // PROTOCOL 2026 · 48KHZ STEREO SYNC</span>
-        <span style={{ display: "flex", gap: "16px" }}>
-          <span>STATUS: ONLINE</span>
-          <span>© 2026 ALL RIGHTS RESERVED</span>
-        </span>
+        <span>TUNETOGETHER · SYNCHRONIZED AUDIO & VIDEO ROOMS</span>
+        <span>© 2026 ALL RIGHTS RESERVED</span>
       </footer>
     </div>
   );

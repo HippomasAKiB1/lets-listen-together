@@ -115,18 +115,16 @@ function InviteQueryContent() {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            border: "var(--border)",
-            boxShadow: "var(--shadow-hard)",
-            padding: "8px",
+            padding: "12px 24px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER LOGO"
-              width={48}
-              height={48}
+              alt="TuneTogether"
+              width={160}
+              height={56}
               priority
-              style={{ objectFit: "contain" }}
+              style={{ height: "56px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -139,7 +137,7 @@ function InviteQueryContent() {
             fontFamily: "var(--font-mono)",
             fontWeight: 700,
           }}>
-            INVITATION VERIFICATION // INCOMING ROUTE
+            ROOM INVITATION
           </p>
         </div>
 
@@ -158,11 +156,11 @@ function InviteQueryContent() {
                 fontWeight: 700,
                 marginBottom: "16px",
               }}>
-                {status === "checking" ? "CHECKING INVITATION TOKEN" : `JOINING ROOM [${code}]`}
+                JOINING ROOM...
                 <span className="cursor-blink">_</span>
               </div>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
-                AUTHENTICATING INVITATION & SYNCHRONIZING WITH HOST SESSION…
+                CONNECTING TO SESSION…
               </p>
             </div>
           )}
@@ -179,13 +177,13 @@ function InviteQueryContent() {
                 display: "inline-block",
                 marginBottom: "16px",
               }}>
-                [INVITATION ACCEPTED]
+                INVITATION ACCEPTED
               </div>
               <h2 style={{ fontSize: "22px", letterSpacing: "-0.02em", marginBottom: "8px" }}>
                 ENTERING ROOM NOW
               </h2>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
-                LOADING SESSION: {roomDetails?.roomName ? `"${roomDetails.roomName}"` : `[${code}]`}…
+                LOADING SESSION: {roomDetails?.roomName ? `"${roomDetails.roomName}"` : code}…
               </p>
             </div>
           )}
@@ -201,7 +199,7 @@ function InviteQueryContent() {
                   PASSWORD REQUIRED
                 </h2>
                 <p style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700, marginTop: "2px" }}>
-                  ROOM [{code}] IS PASSWORD PROTECTED
+                  ROOM {code} IS PASSWORD PROTECTED
                 </p>
               </div>
 
@@ -239,7 +237,7 @@ function InviteQueryContent() {
                   className="btn btn-primary"
                   style={{ width: "100%", padding: "14px", marginTop: "4px" }}
                 >
-                  ENTER ROOM [→]
+                  ENTER ROOM →
                 </button>
               </form>
             </div>
@@ -258,7 +256,6 @@ function InviteQueryContent() {
                 marginBottom: "20px",
                 textAlign: "left",
               }}>
-                [ERROR // VERIFICATION_FAILED]<br />
                 {errorMessage || "UNEXPECTED ERROR OCCURRED."}
               </div>
 
@@ -268,10 +265,10 @@ function InviteQueryContent() {
                   className="btn btn-primary"
                   style={{ width: "100%" }}
                 >
-                  RETRY JOIN [→]
+                  RETRY JOIN →
                 </button>
                 <Link href="/home" className="btn btn-outline" style={{ width: "100%" }}>
-                  BACK TO HUB
+                  BACK TO HOME
                 </Link>
               </div>
             </div>

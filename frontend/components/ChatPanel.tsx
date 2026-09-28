@@ -63,11 +63,8 @@ export default function ChatPanel() {
         alignItems: "center",
       }}>
         <h3 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em" }}>
-          TRANSMISSION CHAT
+          CHAT
         </h3>
-        <span style={{ fontSize: "10px", color: "var(--accent-alt)", fontFamily: "var(--font-mono)" }}>
-          LOG_ACTIVE
-        </span>
       </div>
 
       {/* Messages Scroll Area */}
@@ -95,7 +92,7 @@ export default function ChatPanel() {
             border: "1px dashed var(--ink)",
             margin: "20px 0",
           }}>
-            NO TRANSMISSIONS LOGGED. SEND FIRST MESSAGE.
+            NO MESSAGES YET. SEND A MESSAGE.
           </div>
         ) : (
           messages.map((msg, i) => (

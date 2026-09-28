@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 
 export default function HomePage() {
@@ -45,25 +44,14 @@ export default function HomePage() {
         borderBottom: "var(--border)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            background: "var(--accent)",
-            border: "1px solid #FFFFFF",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "32px",
-            height: "32px",
-          }}>
-            <Image
-              src="/assets/app-logo-trans.png"
-              alt="TUNETOGETHER LOGO"
-              width={22}
-              height={22}
-              priority
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+          <Image
+            src="/assets/app-logo-trans.png"
+            alt="TuneTogether"
+            width={96}
+            height={36}
+            priority
+            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+          />
           <span style={{
             fontFamily: "var(--font-display)",
             fontSize: "18px",
@@ -71,7 +59,7 @@ export default function HomePage() {
             letterSpacing: "0.02em",
             color: "#FFFFFF",
           }}>
-            TUNETOGETHER // HUB
+            TUNETOGETHER
           </span>
         </div>
 
@@ -88,7 +76,7 @@ export default function HomePage() {
             fontWeight: 700,
           }}>
             <span className="online-dot" />
-            <span>SESSION: [{username}]</span>
+            <span>USER: {username}</span>
           </div>
 
           <button onClick={handleLogout} className="btn btn-secondary btn-sm" id="home-logout">
@@ -99,8 +87,8 @@ export default function HomePage() {
 
       {/* ── HORIZONTAL SUB-BAR ── */}
       <div className="section-bar">
-        <span>SESSION DISPATCH // ACTIVE ROOM SELECTION</span>
-        <span>SYS_STATUS: 100% OPERATIONAL</span>
+        <span>ROOM SELECTION</span>
+        <span>CHOOSE AN ACTION</span>
       </div>
 
       {/* ── MAIN CONTENT GRID ── */}
@@ -129,21 +117,11 @@ export default function HomePage() {
         }}>
           <div>
             <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em", marginBottom: "4px" }}>
-              COMMAND HUB
+              ROOM DASHBOARD
             </h1>
             <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--muted)" }}>
-              SELECT AN ACTION TO INITIALIZE OR JOIN A SYNCHRONIZED STREAM.
+              SELECT AN ACTION TO CREATE OR JOIN A SYNCHRONIZED STREAM.
             </p>
-          </div>
-          <div style={{
-            background: "var(--accent-alt)",
-            border: "var(--border)",
-            padding: "6px 12px",
-            fontSize: "12px",
-            fontFamily: "var(--font-mono)",
-            fontWeight: 700,
-          }}>
-            PROTOCOL // STEREO_V2
           </div>
         </div>
 
@@ -181,7 +159,7 @@ export default function HomePage() {
                 fontWeight: 700,
                 padding: "3px 8px",
               }}>
-                [ACT_01 // HOST]
+                HOST
               </span>
               <span style={{ fontSize: "24px", fontWeight: 900 }}>➕</span>
             </div>
@@ -204,7 +182,7 @@ export default function HomePage() {
               fontWeight: 700,
               textDecoration: "underline",
             }}>
-              INITIALIZE ROOM [→]
+              CREATE ROOM →
             </div>
           </div>
 
@@ -235,17 +213,17 @@ export default function HomePage() {
                 fontWeight: 700,
                 padding: "3px 8px",
               }}>
-                [ACT_02 // GUEST]
+                GUEST
               </span>
               <span style={{ fontSize: "24px", fontWeight: 900 }}>🚪</span>
             </div>
 
             <div>
-              <h2 style={{ fontSize: "28px", letterSpacing: "-0.03em", marginBottom: "6px" }}>
+              <h2 style={{ fontSize: "28px", letterSpacing: "-0.02em", marginBottom: "6px" }}>
                 JOIN ROOM
               </h2>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, opacity: 0.9 }}>
-                ENTER A 5-CHARACTER INVITATION CODE OR REDIRECT DIRECTLY INTO AN ACTIVE HOST SESSION.
+                ENTER A 5-CHARACTER INVITATION CODE TO JOIN AN ACTIVE HOST SESSION.
               </p>
             </div>
 
@@ -258,7 +236,7 @@ export default function HomePage() {
               fontWeight: 700,
               textDecoration: "underline",
             }}>
-              ENTER CODE [→]
+              JOIN ROOM →
             </div>
           </div>
         </div>
@@ -270,21 +248,21 @@ export default function HomePage() {
           gap: "16px",
         }}>
           <div className="card" style={{ padding: "16px 20px" }}>
-            <span className="label" style={{ marginBottom: "4px" }}>HARDWARE AUDIO SYNC</span>
+            <span className="label" style={{ marginBottom: "4px" }}>AUDIO SYNC</span>
             <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
-              AUTOMATIC SUB-SECOND DRIFT CORRECTION ELIMINATES AUDIO PHASING ACROSS CLIENTS.
+              SUB-SECOND DRIFT CORRECTION KEEPS PLAYBACK SYNCHRONIZED FOR ALL MEMBERS.
             </p>
           </div>
           <div className="card" style={{ padding: "16px 20px" }}>
             <span className="label" style={{ marginBottom: "4px" }}>DEFAULT MIC MUTED</span>
             <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
-              MICROPHONES INITIALIZE MUTED FOR SECURITY. TOGGLE TO TALK WITH WEBRTC MESH.
+              MICROPHONES INITIALIZE MUTED FOR PRIVACY. TOGGLE TO TALK WITH WEBRTC VOICE.
             </p>
           </div>
           <div className="card" style={{ padding: "16px 20px" }}>
-            <span className="label" style={{ marginBottom: "4px" }}>SHARED QUEUE & HISTORY</span>
+            <span className="label" style={{ marginBottom: "4px" }}>SHARED QUEUE</span>
             <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
-              TRACKS ADVANCE AUTOMATICALLY ONCE FINISHED. HOST HAS DEDICATED PREV / NEXT CONTROLS.
+              TRACKS ADVANCE AUTOMATICALLY ONCE FINISHED. HOST HAS PREV AND NEXT CONTROLS.
             </p>
           </div>
         </div>

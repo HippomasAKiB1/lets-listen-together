@@ -103,7 +103,7 @@ export default function CreateRoomPage() {
             className="btn btn-ghost btn-sm"
             style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
           >
-            <span>←</span> BACK TO HUB
+            <span>←</span> BACK TO HOME
           </Link>
         )}
 
@@ -124,23 +124,23 @@ export default function CreateRoomPage() {
                     CREATE A ROOM
                   </h2>
                   <p style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "var(--font-mono)", fontWeight: 700, marginTop: "2px" }}>
-                    CONFIG: SPECIFY SESSION PARAMETERS
+                    SET UP YOUR ROOM DETAILS
                   </p>
                 </div>
                 <div style={{
                   background: "var(--ink)",
-                  padding: "4px",
+                  padding: "6px 14px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "var(--border-thin)",
                 }}>
                   <Image
                     src="/assets/app-logo-trans.png"
-                    alt="TUNETOGETHER LOGO"
-                    width={28}
-                    height={28}
-                    style={{ objectFit: "contain" }}
+                    alt="TuneTogether"
+                    width={80}
+                    height={32}
+                    priority
+                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function CreateRoomPage() {
                   <input
                     className="input"
                     type="text"
-                    placeholder="E.G. MIDNIGHT VINYL SANCTUARY"
+                    placeholder="ENTER ROOM NAME"
                     value={roomName}
                     onChange={(e) => setRoomName(e.target.value)}
                     required
@@ -216,7 +216,7 @@ export default function CreateRoomPage() {
                   id="create-room-submit"
                   style={{ width: "100%", marginTop: "6px", padding: "14px" }}
                 >
-                  {loading ? "INITIALIZING ROOM…" : "INITIALIZE ROOM [→]"}
+                  {loading ? "CREATING ROOM…" : "CREATE ROOM →"}
                 </button>
               </form>
             </>
@@ -225,14 +225,14 @@ export default function CreateRoomPage() {
               <div style={{
                 background: "var(--accent-alt)",
                 border: "var(--border)",
-                padding: "8px",
+                padding: "8px 14px",
                 display: "inline-block",
                 marginBottom: "16px",
                 fontSize: "12px",
                 fontFamily: "var(--font-mono)",
                 fontWeight: 700,
               }}>
-                [ROOM_INITIALIZED_SUCCESS]
+                ROOM READY
               </div>
 
               <h2 style={{ fontSize: "24px", letterSpacing: "-0.02em", marginBottom: "6px" }}>
@@ -261,10 +261,10 @@ export default function CreateRoomPage() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
                 <button onClick={handleCopyCode} className="btn btn-secondary btn-sm">
-                  {copiedCode ? "[✓] CODE COPIED" : "COPY CODE"}
+                  {copiedCode ? "CODE COPIED" : "COPY CODE"}
                 </button>
                 <button onClick={handleCopyLink} className="btn btn-secondary btn-sm">
-                  {copiedLink ? "[✓] LINK COPIED" : "COPY INVITE LINK"}
+                  {copiedLink ? "LINK COPIED" : "COPY INVITE LINK"}
                 </button>
               </div>
 
@@ -274,7 +274,7 @@ export default function CreateRoomPage() {
                 style={{ width: "100%", padding: "14px" }}
                 id="create-room-enter"
               >
-                ENTER ROOM SESSION [→]
+                ENTER ROOM →
               </button>
             </div>
           )}

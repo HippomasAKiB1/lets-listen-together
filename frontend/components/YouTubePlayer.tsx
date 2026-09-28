@@ -460,14 +460,14 @@ export default function YouTubePlayer() {
               fontFamily: "var(--font-mono)",
               fontWeight: 900,
             }}>
-              [TRACK FINISHED]
+              TRACK FINISHED
             </span>
             <div>
               <h4 style={{ fontSize: "18px", fontWeight: "900", color: "#FFFFFF", margin: "0 0 6px 0", letterSpacing: "-0.02em" }}>
-                END OF STREAM
+                TRACK ENDED
               </h4>
               <p style={{ fontSize: "12px", color: "var(--muted-light)", margin: 0, fontFamily: "var(--font-mono)" }}>
-                {isHost ? "SELECT A NEW TRACK FROM SEARCH OR ADVANCE QUEUE" : "AWAITING NEXT SELECTION FROM HOST…"}
+                {isHost ? "SELECT A NEW TRACK FROM SEARCH OR ADVANCE QUEUE" : "WAITING FOR NEXT TRACK FROM HOST…"}
               </p>
             </div>
           </div>
@@ -501,7 +501,7 @@ export default function YouTubePlayer() {
             pointerEvents: "none",
             zIndex: 5,
           }}>
-            [DUCKING ACTIVE // 40%]
+            VOICE DUCKING ACTIVE
           </div>
         )}
 
@@ -523,10 +523,10 @@ export default function YouTubePlayer() {
             }}
           >
             <button className="btn btn-primary" style={{ padding: "12px 24px", fontSize: "13px" }}>
-              CLICK TO SYNCHRONIZE AUDIO [▶]
+              CLICK TO PLAY AUDIO ▶
             </button>
             <span style={{ fontSize: "11px", color: "var(--accent-alt)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-              BROWSER BLOCKED UNATTENDED PLAYBACK
+              CLICK TO UNMUTE AUDIO
             </span>
           </div>
         )}
@@ -591,7 +591,7 @@ export default function YouTubePlayer() {
                 onClick={handlePrevTrack}
                 className="btn btn-secondary btn-icon"
                 style={{ width: "40px", height: "40px" }}
-                title="PREVIOUS TRACK / REWIND [⏮]"
+                title="PREVIOUS TRACK"
               >
                 <span>⏮</span>
               </button>
@@ -617,7 +617,7 @@ export default function YouTubePlayer() {
                 padding: "6px 12px",
                 border: "var(--border-thin)",
               }}>
-                [LOCKED // HOST CONTROLLED]
+                CONTROLLED BY HOST
               </div>
             )}
 
@@ -688,13 +688,13 @@ export default function YouTubePlayer() {
             fontFamily: "var(--font-mono)",
             fontWeight: 700,
           }}>
-            [STANDBY // AUDIO_ENGINE_IDLE]
+            NO TRACK PLAYING
           </span>
           <h4 style={{ fontSize: "16px", letterSpacing: "-0.01em", margin: "4px 0" }}>
-            {isHost ? "SEARCH ARCHIVE TO INITIALIZE PLAYLIST" : "AWAITING TRANSMISSION FROM HOST SESSION"}
+            {isHost ? "SEARCH FOR A SONG TO PLAY" : "WAITING FOR HOST TO PLAY A TRACK"}
           </h4>
           <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
-            {isHost ? "USE THE QUERY BAR ABOVE TO LOAD A TRACK FROM YOUTUBE." : "ONCE THE HOST PLAYS A TRACK, AUDIO AND VIDEO WILL STREAM IN REAL TIME."}
+            {isHost ? "USE THE SEARCH BAR ABOVE TO FIND A SONG OR ADD TO QUEUE." : "ONCE THE HOST STARTS PLAYING, AUDIO AND VIDEO WILL PLAY IN SYNC."}
           </p>
         </div>
       )}
