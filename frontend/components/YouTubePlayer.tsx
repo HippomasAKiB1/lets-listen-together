@@ -428,37 +428,46 @@ export default function YouTubePlayer() {
         width: "100%",
         maxWidth: "600px",
         aspectRatio: "16/9",
-        borderRadius: "16px",
         overflow: "hidden",
-        boxShadow: "0 16px 48px rgba(0,0,0,0.6), 0 0 40px var(--accent-light)",
-        border: "1px solid var(--border)",
-        background: "#000",
+        boxShadow: "var(--shadow-hard-lg)",
+        border: "var(--border)",
+        background: "#000000",
       }}>
         <div id="yt-player-iframe" style={{ width: "100%", height: "100%" }}></div>
 
-        {/* Track Ended Clean State Overlay — eliminates YouTube recommended cards */}
+        {/* Track Ended Clean State Overlay */}
         {!currentSong.is_playing && currentSong.video_id && localProgress > 0 && currentSong.duration_seconds > 0 && localProgress >= (currentSong.duration_seconds - 3) && (
           <div style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(10, 10, 10, 0.94)",
+            background: "#0A0A0A",
+            border: "var(--border)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "14px",
+            gap: "12px",
             zIndex: 8,
-            backdropFilter: "blur(6px)",
             padding: "24px",
             textAlign: "center",
           }}>
-            <span style={{ fontSize: "40px" }}>🎉</span>
+            <span style={{
+              background: "var(--accent-alt)",
+              color: "#0A0A0A",
+              border: "1px solid #000",
+              padding: "2px 8px",
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 900,
+            }}>
+              [TRACK FINISHED]
+            </span>
             <div>
-              <h4 style={{ fontSize: "18px", fontWeight: "700", color: "#fff", margin: "0 0 6px 0" }}>
-                Track Finished
+              <h4 style={{ fontSize: "18px", fontWeight: "900", color: "#FFFFFF", margin: "0 0 6px 0", letterSpacing: "-0.02em" }}>
+                END OF STREAM
               </h4>
-              <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
-                {isHost ? "Choose a new track from Search or check your Queue" : "Waiting for the host to pick the next track..."}
+              <p style={{ fontSize: "12px", color: "var(--muted-light)", margin: 0, fontFamily: "var(--font-mono)" }}>
+                {isHost ? "SELECT A NEW TRACK FROM SEARCH OR ADVANCE QUEUE" : "AWAITING NEXT SELECTION FROM HOST…"}
               </p>
             </div>
           </div>
@@ -473,7 +482,7 @@ export default function YouTubePlayer() {
               zIndex: 4,
               cursor: "default",
             }}
-            title="Playback controlled by Host"
+            title="PLAYBACK CONTROLLED BY HOST"
           />
         )}
 
@@ -482,17 +491,17 @@ export default function YouTubePlayer() {
             position: "absolute",
             top: "12px",
             right: "12px",
-            background: "rgba(12, 12, 12, 0.8)",
-            padding: "6px 12px",
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: "600",
-            color: "#A78BFA",
-            backdropFilter: "blur(4px)",
+            background: "var(--accent-alt)",
+            color: "var(--ink)",
+            border: "1px solid var(--ink)",
+            padding: "4px 8px",
+            fontSize: "11px",
+            fontWeight: "700",
+            fontFamily: "var(--font-mono)",
             pointerEvents: "none",
             zIndex: 5,
           }}>
-            🎤 Ducking active (40%)
+            [DUCKING ACTIVE // 40%]
           </div>
         )}
 
@@ -502,7 +511,8 @@ export default function YouTubePlayer() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(15, 15, 15, 0.85)",
+              background: "#0A0A0A",
+              border: "var(--border)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -512,32 +522,36 @@ export default function YouTubePlayer() {
               zIndex: 10,
             }}
           >
-            <button className="btn btn-primary" style={{ padding: "12px 24px", fontSize: "15px" }}>
-              ▶ Click to Sync Audio
+            <button className="btn btn-primary" style={{ padding: "12px 24px", fontSize: "13px" }}>
+              CLICK TO SYNCHRONIZE AUDIO [▶]
             </button>
-            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-              Browser blocked background audio
+            <span style={{ fontSize: "11px", color: "var(--accent-alt)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+              BROWSER BLOCKED UNATTENDED PLAYBACK
             </span>
           </div>
         )}
       </div>
 
       {currentSong.video_id ? (
-        <div className="fade-in" style={{
+        <div style={{
           width: "100%",
           maxWidth: "600px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: "16px",
+          background: "var(--surface)",
+          border: "var(--border)",
+          boxShadow: "var(--shadow-hard)",
+          padding: "20px 24px",
         }}>
           {/* Track Info */}
           <div style={{ textAlign: "center" }}>
-            <h3 style={{ fontSize: "18px", fontWeight: "800", marginBottom: "4px" }}>
-              {currentSong.song_title || "Unknown Title"}
+            <h3 style={{ fontSize: "16px", letterSpacing: "-0.01em", marginBottom: "4px" }}>
+              {currentSong.song_title || "UNTITLED TRACK"}
             </h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-              {currentSong.artist || "Unknown Artist"}
+            <p style={{ color: "var(--muted)", fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+              {currentSong.artist || "UNKNOWN ARTIST"}
             </p>
           </div>
 
@@ -558,9 +572,11 @@ export default function YouTubePlayer() {
             <div style={{
               display: "flex",
               justifyContent: "space-between",
-              fontSize: "12px",
-              color: "var(--text-muted)",
-              marginTop: "8px",
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              color: "var(--muted)",
+              marginTop: "6px",
             }}>
               <span>{formatTime(localProgress)}</span>
               <span>{formatTime(currentSong.duration_seconds)}</span>
@@ -568,46 +584,40 @@ export default function YouTubePlayer() {
           </div>
 
           {/* Playback & Volume Controls */}
-          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "12px" }}>
             {/* Host Previous Track Button */}
             {isHost && (
               <button
                 onClick={handlePrevTrack}
-                className="btn btn-secondary"
-                style={{
-                  borderRadius: "50%",
-                  width: "44px",
-                  height: "44px",
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                title="Previous Track / Rewind (⏮)"
+                className="btn btn-secondary btn-icon"
+                style={{ width: "40px", height: "40px" }}
+                title="PREVIOUS TRACK / REWIND [⏮]"
               >
-                <span style={{ fontSize: "16px" }}>⏮</span>
+                <span>⏮</span>
               </button>
             )}
 
             {isHost ? (
               <button
                 onClick={togglePlayPause}
-                className="btn btn-primary"
-                style={{ borderRadius: "50%", width: "56px", height: "56px", padding: 0 }}
+                className="btn btn-primary btn-icon"
+                style={{ width: "46px", height: "46px" }}
                 id="player-play-pause"
+                title={currentSong.is_playing ? "PAUSE" : "PLAY"}
               >
-                <span style={{ fontSize: "22px" }}>{currentSong.is_playing ? "⏸" : "▶"}</span>
+                <span style={{ fontSize: "18px" }}>{currentSong.is_playing ? "⏸" : "▶"}</span>
               </button>
             ) : (
               <div style={{
-                color: "var(--text-muted)",
-                fontSize: "13px",
-                background: "var(--bg-secondary)",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid var(--border)",
+                color: "var(--ink)",
+                fontSize: "11px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                background: "var(--bg)",
+                padding: "6px 12px",
+                border: "var(--border-thin)",
               }}>
-                🔒 Controlled by Host
+                [LOCKED // HOST CONTROLLED]
               </div>
             )}
 
@@ -615,26 +625,29 @@ export default function YouTubePlayer() {
             {isHost && (
               <button
                 onClick={handleNextTrack}
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-icon"
                 style={{
-                  borderRadius: "50%",
-                  width: "44px",
-                  height: "44px",
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: queue.length > 0 ? 1 : 0.65,
+                  width: "40px",
+                  height: "40px",
+                  opacity: queue.length > 0 ? 1 : 0.6,
                 }}
-                title={queue.length > 0 ? `Next: ${queue[0]?.song_title}` : "Next Track (Queue is empty)"}
+                title={queue.length > 0 ? `NEXT: ${queue[0]?.song_title}` : "NEXT TRACK (QUEUE EMPTY)"}
               >
-                <span style={{ fontSize: "16px" }}>⏭</span>
+                <span>⏭</span>
               </button>
             )}
 
             {/* Volume slider */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "16px", opacity: 0.6 }}>🔊</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginLeft: "8px",
+              background: "var(--bg)",
+              border: "var(--border-thin)",
+              padding: "4px 8px",
+            }}>
+              <span style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>VOL</span>
               <input
                 type="range"
                 min="0"
@@ -643,11 +656,11 @@ export default function YouTubePlayer() {
                 onChange={handleVolumeChange}
                 style={{
                   WebkitAppearance: "none",
-                  width: "90px",
-                  height: "4px",
-                  background: "var(--border)",
-                  borderRadius: "2px",
+                  width: "70px",
+                  height: "6px",
+                  background: "var(--ink)",
                   outline: "none",
+                  cursor: "pointer",
                 }}
               />
             </div>
@@ -655,15 +668,33 @@ export default function YouTubePlayer() {
         </div>
       ) : (
         <div style={{
-          color: "var(--text-muted)",
+          color: "var(--ink)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: "12px",
+          background: "var(--surface)",
+          border: "var(--border)",
+          boxShadow: "var(--shadow-hard)",
+          padding: "32px 24px",
+          maxWidth: "460px",
+          textAlign: "center",
         }}>
-          <span style={{ fontSize: "48px" }}>📻</span>
-          <p style={{ fontSize: "15px", fontWeight: "500" }}>
-            {isHost ? "Search and play a song to start listening" : "Waiting for the host to play a song..."}
+          <span style={{
+            background: "var(--ink)",
+            color: "var(--accent-alt)",
+            padding: "4px 8px",
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+          }}>
+            [STANDBY // AUDIO_ENGINE_IDLE]
+          </span>
+          <h4 style={{ fontSize: "16px", letterSpacing: "-0.01em", margin: "4px 0" }}>
+            {isHost ? "SEARCH ARCHIVE TO INITIALIZE PLAYLIST" : "AWAITING TRANSMISSION FROM HOST SESSION"}
+          </h4>
+          <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
+            {isHost ? "USE THE QUERY BAR ABOVE TO LOAD A TRACK FROM YOUTUBE." : "ONCE THE HOST PLAYS A TRACK, AUDIO AND VIDEO WILL STREAM IN REAL TIME."}
           </p>
         </div>
       )}

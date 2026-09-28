@@ -28,7 +28,7 @@ function LoginContent() {
       setAuth(res.data.access_token, res.data.user_id, res.data.username);
       router.push(redirect);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Login failed. Check your credentials.");
+      setError(err?.response?.data?.detail || "LOGIN FAILED. CHECK CREDENTIALS.");
     } finally {
       setLoading(false);
     }
@@ -40,78 +40,97 @@ function LoginContent() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "radial-gradient(ellipse at 50% 15%, rgba(139, 92, 246, 0.16) 0%, #08080C 75%)",
+      background: "var(--bg)",
       padding: "24px",
       position: "relative",
     }}>
-      {/* Decorative ambient light */}
-      <div style={{
-        position: "absolute",
-        top: "20%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "360px",
-        height: "360px",
-        background: "radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, transparent 70%)",
-        filter: "blur(70px)",
-        pointerEvents: "none",
-      }} />
-
-      <div className="fade-in" style={{ width: "100%", maxWidth: "420px", position: "relative", zIndex: 2 }}>
+      <div style={{ width: "100%", maxWidth: "440px" }}>
+        
         {/* Brand Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Link href="/" style={{ textDecoration: "none", display: "inline-block" }}>
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--ink)",
+            border: "var(--border)",
+            boxShadow: "var(--shadow-hard)",
+            padding: "8px",
+            marginBottom: "16px",
+          }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TuneTogether Logo"
-              width={76}
-              height={76}
+              alt="TUNETOGETHER LOGO"
+              width={48}
+              height={48}
               priority
-              style={{ objectFit: "contain", filter: "drop-shadow(0 8px 24px rgba(139,92,246,0.4))" }}
+              style={{ objectFit: "contain" }}
             />
-          </Link>
-          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.02em", marginTop: "12px" }}>
-            TuneTogether
+          </div>
+          <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
+            TUNETOGETHER
           </h1>
-          <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
-            Listen together. Feel the same beat.
+          <p style={{
+            fontSize: "12px",
+            color: "var(--muted)",
+            marginTop: "4px",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+          }}>
+            AUTHENTICATION GATEWAY // SECURE SESSION
           </p>
         </div>
 
         {/* Card */}
-        <div className="card card-glow" style={{ padding: "34px 30px" }}>
+        <div className="card" style={{ padding: "32px 28px" }}>
+          
+          {/* Top Bar inside card */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderBottom: "var(--border)",
+            paddingBottom: "12px",
+            marginBottom: "20px",
+          }}>
+            <h2 style={{ fontSize: "18px", letterSpacing: "-0.02em" }}>
+              SIGN IN
+            </h2>
+            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent)" }}>
+              [AUTH_REQ]
+            </span>
+          </div>
+
+          {/* Invite Alert Strip */}
           {isInvite && (
             <div style={{
-              background: "rgba(139, 92, 246, 0.12)",
-              border: "1px solid rgba(139, 92, 246, 0.3)",
-              borderRadius: "12px",
-              padding: "12px 14px",
-              marginBottom: "22px",
-              fontSize: "13px",
-              color: "#DDD6FE",
+              background: "var(--accent-alt)",
+              border: "var(--border)",
+              boxShadow: "var(--shadow-hard-sm)",
+              padding: "10px 12px",
+              marginBottom: "20px",
+              fontSize: "12px",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              color: "var(--ink)",
               display: "flex",
               alignItems: "center",
-              gap: "10px",
-              lineHeight: "1.4",
+              gap: "8px",
             }}>
-              <span style={{ fontSize: "18px" }}>👋</span>
-              <span><strong>You were invited to a room!</strong> Sign in to join immediately.</span>
+              <span>[!]</span>
+              <span>INVITATION ACTIVE. SIGN IN TO ENTER ROOM.</span>
             </div>
           )}
 
-          <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "22px" }}>
-            Sign In
-          </h2>
-
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             <div>
-              <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                Username
+              <label className="label" style={{ marginBottom: "6px" }}>
+                USERNAME
               </label>
               <input
                 className="input"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="ENTER USERNAME"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoFocus
@@ -122,13 +141,13 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                Password
+              <label className="label" style={{ marginBottom: "6px" }}>
+                PASSWORD
               </label>
               <input
                 className="input"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="ENTER PASSWORD"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -137,28 +156,48 @@ function LoginContent() {
               />
             </div>
 
-            {error && <p className="error-text">{error}</p>}
+            {error && (
+              <div style={{
+                background: "#FFE5E5",
+                border: "2px solid var(--error)",
+                padding: "8px 12px",
+                color: "var(--error)",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}>
+                ERROR: {error}
+              </div>
+            )}
 
             <button
               type="submit"
               className="btn btn-primary"
               disabled={loading}
               id="login-submit"
-              style={{ width: "100%", marginTop: "8px", padding: "14px" }}
+              style={{ width: "100%", marginTop: "6px", padding: "14px" }}
             >
-              {loading ? "Signing in…" : "Sign In"}
+              {loading ? "AUTHENTICATING…" : "SIGN IN [→]"}
             </button>
           </form>
 
-          <p style={{ textAlign: "center", marginTop: "24px", color: "var(--text-secondary)", fontSize: "14px" }}>
-            Don&apos;t have an account?{" "}
+          {/* Footer link */}
+          <div style={{
+            marginTop: "24px",
+            paddingTop: "16px",
+            borderTop: "var(--border-thin)",
+            textAlign: "center",
+            fontSize: "12px",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+          }}>
+            NO ACCOUNT?{" "}
             <Link
               href={`/register${redirect !== "/home" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
-              style={{ color: "#C4B5FD", fontWeight: "600", textDecoration: "none" }}
+              style={{ color: "var(--accent)", textDecoration: "underline", marginLeft: "4px" }}
             >
-              Create Account
+              CREATE NEW ACCOUNT
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -167,7 +206,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#08080C" }} />}>
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "var(--bg)" }} />}>
       <LoginContent />
     </Suspense>
   );

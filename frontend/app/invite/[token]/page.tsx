@@ -27,19 +27,17 @@ export default function InvitePage({ params }: InvitePageProps) {
 
   useEffect(() => {
     if (!token) {
-      setErrorMessage("No invite code provided.");
+      setErrorMessage("NO INVITATION CODE PROVIDED.");
       setStatus("error");
       return;
     }
 
-    // Step 1: Check Auth
     if (!isAuthenticated()) {
       const destination = `/invite/${token}`;
       router.push(`/login?redirect=${encodeURIComponent(destination)}`);
       return;
     }
 
-    // Step 2: Auto-join immediately
     handleJoinRoom();
   }, [token, isAuthenticated, router]);
 
@@ -56,7 +54,6 @@ export default function InvitePage({ params }: InvitePageProps) {
       setRoomDetails({ roomName: res.data.room_name });
       setStatus("joined");
 
-      // Save to zustand store
       setRoom({
         roomId: res.data.room_id,
         roomName: res.data.room_name,
@@ -66,7 +63,6 @@ export default function InvitePage({ params }: InvitePageProps) {
         currentSong: res.data.current_song || {},
       });
 
-      // Navigate to the room immediately
       setTimeout(() => {
         router.push(`/room?id=${res.data.room_id}`);
       }, 700);
@@ -78,19 +74,19 @@ export default function InvitePage({ params }: InvitePageProps) {
         router.push(`/login?redirect=${encodeURIComponent(`/invite/${token}`)}`);
       } else if (statusCode === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
         setStatus("password_required");
-        setErrorMessage(pwd ? "Incorrect password. Please try again." : "");
+        setErrorMessage(pwd ? "INCORRECT PASSWORD. TRY AGAIN." : "");
       } else if (statusCode === 404) {
         setStatus("error");
-        setErrorMessage("Room not found or this invite link has expired.");
+        setErrorMessage("ROOM NOT FOUND OR THIS INVITE LINK HAS EXPIRED.");
       } else if (statusCode === 409) {
         setStatus("error");
-        setErrorMessage("This room is currently full and cannot accept more members.");
+        setErrorMessage("THIS ROOM IS CURRENTLY FULL (MAX CAPACITY REACHED).");
       } else {
         setStatus("error");
         setErrorMessage(
           typeof detail === "string"
-            ? detail
-            : err?.message || "Failed to join room. Please check your connection."
+            ? detail.toUpperCase()
+            : err?.message?.toUpperCase() || "FAILED TO JOIN ROOM. VERIFY CONNECTION."
         );
       }
     }
@@ -99,7 +95,7 @@ export default function InvitePage({ params }: InvitePageProps) {
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) {
-      setErrorMessage("Please enter the room password.");
+      setErrorMessage("ENTER THE ROOM PASSWORD.");
       return;
     }
     handleJoinRoom(password);
@@ -111,74 +107,67 @@ export default function InvitePage({ params }: InvitePageProps) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.15) 0%, #08080C 75%)",
+      background: "var(--bg)",
       padding: "24px",
       position: "relative",
     }}>
-      {/* Background ambient lighting */}
-      <div style={{
-        position: "absolute",
-        top: "15%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "360px",
-        height: "360px",
-        background: "radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%)",
-        filter: "blur(60px)",
-        pointerEvents: "none",
-      }} />
-
-      <div className="fade-in" style={{ width: "100%", maxWidth: "440px", position: "relative", zIndex: 2 }}>
+      <div style={{ width: "100%", maxWidth: "440px" }}>
         
-        {/* Transparent Brand Logo */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        {/* Brand Header */}
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <div style={{
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: "12px",
+            background: "var(--ink)",
+            border: "var(--border)",
+            boxShadow: "var(--shadow-hard)",
+            padding: "8px",
+            marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TuneTogether Logo"
-              width={76}
-              height={76}
+              alt="TUNETOGETHER LOGO"
+              width={48}
+              height={48}
               priority
-              style={{ objectFit: "contain", filter: "drop-shadow(0 8px 24px rgba(139,92,246,0.45))" }}
+              style={{ objectFit: "contain" }}
             />
           </div>
-          <h1 style={{ fontSize: "24px", fontWeight: "800", letterSpacing: "-0.02em" }}>
-            TuneTogether
+          <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
+            TUNETOGETHER
           </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "4px" }}>
-            Real-Time Shared Listening
+          <p style={{
+            fontSize: "12px",
+            color: "var(--muted)",
+            marginTop: "4px",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+          }}>
+            INVITATION VERIFICATION // INCOMING ROUTE
           </p>
         </div>
 
         {/* State Card */}
-        <div className="card card-glow" style={{ padding: "36px 30px" }}>
+        <div className="card" style={{ padding: "32px 28px" }}>
           
           {(status === "checking" || status === "joining") && (
-            <div style={{ textAlign: "center", padding: "16px 0" }}>
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
               <div style={{
-                width: "48px",
-                height: "48px",
-                border: "3px solid rgba(139, 92, 246, 0.2)",
-                borderTopColor: "var(--accent)",
-                borderRadius: "50%",
-                margin: "0 auto 20px",
-                animation: "spin 0.8s linear infinite",
-              }} />
-              <style>{`
-                @keyframes spin {
-                  to { transform: rotate(360deg); }
-                }
-              `}</style>
-              <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>
-                {status === "checking" ? "Checking invitation…" : `Joining room ${token}…`}
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-                Connecting you to the synchronized audio session.
+                background: "var(--ink)",
+                color: "var(--accent-alt)",
+                border: "var(--border)",
+                padding: "16px",
+                fontSize: "14px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                marginBottom: "16px",
+              }}>
+                {status === "checking" ? "CHECKING INVITATION TOKEN" : `JOINING ROOM [${token}]`}
+                <span className="cursor-blink">_</span>
+              </div>
+              <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
+                AUTHENTICATING INVITATION & SYNCHRONIZING WITH HOST SESSION…
               </p>
             </div>
           )}
@@ -186,49 +175,50 @@ export default function InvitePage({ params }: InvitePageProps) {
           {status === "joined" && (
             <div style={{ textAlign: "center", padding: "16px 0" }}>
               <div style={{
-                width: "56px",
-                height: "56px",
-                background: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "26px",
-                margin: "0 auto 16px",
+                background: "var(--accent-alt)",
+                border: "var(--border)",
+                padding: "8px 12px",
+                fontSize: "13px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                display: "inline-block",
+                marginBottom: "16px",
               }}>
-                ✓
+                [INVITATION ACCEPTED]
               </div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "6px" }}>
-                You&apos;re in!
+              <h2 style={{ fontSize: "22px", letterSpacing: "-0.02em", marginBottom: "8px" }}>
+                ENTERING ROOM NOW
               </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-                Entering {roomDetails?.roomName ? `"${roomDetails.roomName}"` : "the listening room"}…
+              <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
+                LOADING SESSION: {roomDetails?.roomName ? `"${roomDetails.roomName}"` : `[${token}]`}…
               </p>
             </div>
           )}
 
           {status === "password_required" && (
             <div>
-              <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                <span style={{ fontSize: "32px" }}>🔒</span>
-                <h2 style={{ fontSize: "20px", fontWeight: "700", marginTop: "8px", marginBottom: "6px" }}>
-                  Password Protected Room
+              <div style={{
+                borderBottom: "var(--border)",
+                paddingBottom: "12px",
+                marginBottom: "20px",
+              }}>
+                <h2 style={{ fontSize: "18px", letterSpacing: "-0.02em" }}>
+                  PASSWORD REQUIRED
                 </h2>
-                <p style={{ color: "var(--text-secondary)", fontSize: "13px" }}>
-                  Room <strong style={{ color: "#C4B5FD" }}>{token}</strong> requires a password to enter.
+                <p style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700, marginTop: "2px" }}>
+                  ROOM [{token}] IS PASSWORD PROTECTED
                 </p>
               </div>
 
               <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div>
-                  <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                    Room Password
+                  <label className="label" style={{ marginBottom: "6px" }}>
+                    ROOM PASSWORD
                   </label>
                   <input
                     className="input"
                     type="password"
-                    placeholder="Enter room password"
+                    placeholder="ENTER ROOM PASSWORD"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoFocus
@@ -236,41 +226,46 @@ export default function InvitePage({ params }: InvitePageProps) {
                   />
                 </div>
 
-                {errorMessage && <p className="error-text">{errorMessage}</p>}
+                {errorMessage && (
+                  <div style={{
+                    background: "#FFE5E5",
+                    border: "2px solid var(--error)",
+                    padding: "8px 12px",
+                    color: "var(--error)",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                  }}>
+                    ERROR: {errorMessage}
+                  </div>
+                )}
 
                 <button
                   type="submit"
                   className="btn btn-primary"
                   style={{ width: "100%", padding: "14px", marginTop: "4px" }}
                 >
-                  Join Room
+                  ENTER ROOM [→]
                 </button>
               </form>
             </div>
           )}
 
           {status === "error" && (
-            <div style={{ textAlign: "center", padding: "12px 0" }}>
+            <div style={{ textAlign: "center", padding: "8px 0" }}>
               <div style={{
-                width: "54px",
-                height: "54px",
-                background: "rgba(239, 68, 68, 0.12)",
-                border: "1px solid rgba(239, 68, 68, 0.25)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "24px",
-                margin: "0 auto 16px",
+                background: "#FFE5E5",
+                border: "2px solid var(--error)",
+                padding: "16px",
+                color: "var(--error)",
+                fontSize: "13px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                marginBottom: "20px",
+                textAlign: "left",
               }}>
-                ✕
+                [ERROR // VERIFICATION_FAILED]<br />
+                {errorMessage || "UNEXPECTED ERROR OCCURRED."}
               </div>
-              <h2 style={{ fontSize: "19px", fontWeight: "700", marginBottom: "8px" }}>
-                Unable to Join Room
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px", lineHeight: "1.5" }}>
-                {errorMessage || "An unexpected error occurred while processing this invite."}
-              </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <button
@@ -278,10 +273,10 @@ export default function InvitePage({ params }: InvitePageProps) {
                   className="btn btn-primary"
                   style={{ width: "100%" }}
                 >
-                  Try Again
+                  RETRY JOIN [→]
                 </button>
-                <Link href="/home" className="btn btn-ghost" style={{ width: "100%" }}>
-                  Back to Home
+                <Link href="/home" className="btn btn-outline" style={{ width: "100%" }}>
+                  BACK TO HUB
                 </Link>
               </div>
             </div>

@@ -13,7 +13,6 @@ export default function ScreenShareViewer() {
   const isHost = userId === hostId;
 
   useEffect(() => {
-    // Check if a stream is already active (e.g. host started sharing before viewer mounted, or remote stream stored)
     const existing = getScreenshareStream();
     if (existing) {
       setStream(existing);
@@ -53,16 +52,23 @@ export default function ScreenShareViewer() {
         justifyContent: "center",
         height: "100%",
         padding: "40px",
-        color: "var(--text-muted)",
+        color: "var(--muted)",
         gap: "16px",
+        background: "#000000",
       }}>
-        <span style={{ fontSize: "48px" }}>📺</span>
-        <div style={{ textAlign: "center" }}>
-          <h3 style={{ color: "var(--text-primary)", marginBottom: "4px", fontSize: "16px", fontWeight: "600" }}>
-            Waiting for Screen Share
+        <div style={{
+          background: "var(--surface)",
+          border: "var(--border)",
+          padding: "24px",
+          textAlign: "center",
+          maxWidth: "380px",
+          boxShadow: "var(--shadow-hard)",
+        }}>
+          <h3 style={{ color: "var(--ink)", marginBottom: "6px", fontSize: "14px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+            [AWAITING SCREEN TRANSMISSION]
           </h3>
-          <p style={{ fontSize: "13px" }}>
-            The host started screensharing mode. Once the stream starts, it will display here.
+          <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
+            THE HOST HAS INITIALIZED SCREENSHARE MODE. DISPLAY STREAM WILL RENDER ONCE BROADCAST BEGINS.
           </p>
         </div>
       </div>
@@ -76,7 +82,7 @@ export default function ScreenShareViewer() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#000",
+      background: "#000000",
       position: "relative",
     }}>
       <video
@@ -93,21 +99,22 @@ export default function ScreenShareViewer() {
       />
       <div style={{
         position: "absolute",
-        bottom: "20px",
-        left: "20px",
-        background: "rgba(15, 15, 15, 0.85)",
-        border: "1px solid var(--border)",
-        padding: "8px 14px",
-        borderRadius: "8px",
-        fontSize: "12px",
+        bottom: "16px",
+        left: "16px",
+        background: "var(--ink)",
+        border: "1px solid #FFFFFF",
+        padding: "6px 12px",
+        fontSize: "11px",
+        fontFamily: "var(--font-mono)",
+        fontWeight: 700,
         display: "flex",
         alignItems: "center",
-        gap: "6px",
-        color: "#fff",
+        gap: "8px",
+        color: "#FFFFFF",
         pointerEvents: "none",
       }}>
-        <span style={{ width: "8px", height: "8px", background: "var(--error)", borderRadius: "50%", display: "inline-block" }} />
-        LIVE SCREENSHARE
+        <span style={{ width: "8px", height: "8px", background: "var(--error)", display: "inline-block" }} />
+        LIVE SCREENSHARE STREAM
       </div>
     </div>
   );

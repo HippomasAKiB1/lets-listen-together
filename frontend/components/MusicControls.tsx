@@ -24,7 +24,6 @@ export default function MusicControls() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load default/fallback list on mount
   useEffect(() => {
     if (!isHost) return;
     const fetchDefault = async () => {
@@ -85,45 +84,46 @@ export default function MusicControls() {
   return (
     <div style={{
       width: "100%",
-      borderBottom: "1px solid var(--border)",
-      background: "var(--bg-secondary)",
-      padding: "16px 24px",
+      borderBottom: "var(--border-thin)",
+      background: "var(--bg)",
+      padding: "10px 16px",
       position: "relative",
-      zIndex: 10,
+      zIndex: 20,
     }}>
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: "10px" }}>
+      <form onSubmit={handleSearch} style={{ display: "flex", gap: "8px" }}>
         <div style={{ position: "relative", flex: 1 }}>
           <input
             className="input"
             type="text"
-            placeholder="🔍 Search YouTube for songs..."
+            placeholder="SEARCH YOUTUBE ARCHIVE..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsOpen(true)}
             id="music-search-input"
-            style={{ paddingRight: "40px" }}
+            style={{ paddingRight: "60px", fontSize: "12px", padding: "10px 12px" }}
           />
           {isOpen && results.length > 0 && (
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="btn btn-ghost"
+              className="btn btn-ghost btn-sm"
               style={{
                 position: "absolute",
-                right: "8px",
+                right: "4px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                padding: "4px 8px",
-                height: "auto",
-                fontSize: "12px",
+                padding: "2px 6px",
+                fontSize: "10px",
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
               }}
             >
-              Close
+              [X]
             </button>
           )}
         </div>
-        <button type="submit" className="btn btn-primary" disabled={loading} id="music-search-submit">
-          {loading ? "Searching..." : "Search"}
+        <button type="submit" className="btn btn-primary btn-sm" disabled={loading} id="music-search-submit">
+          {loading ? "QUERYING..." : "SEARCH [→]"}
         </button>
       </form>
 
@@ -132,14 +132,13 @@ export default function MusicControls() {
         <div style={{
           position: "absolute",
           top: "100%",
-          left: "24px",
-          right: "24px",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
-          marginTop: "8px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-          maxHeight: "320px",
+          left: "16px",
+          right: "16px",
+          background: "var(--surface)",
+          border: "var(--border)",
+          boxShadow: "var(--shadow-hard-lg)",
+          marginTop: "4px",
+          maxHeight: "300px",
           overflowY: "auto",
         }}>
           {results.map((song) => {
@@ -151,40 +150,40 @@ export default function MusicControls() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  padding: "10px 16px",
+                  gap: "10px",
+                  padding: "8px 12px",
                   cursor: "pointer",
-                  borderBottom: "1px solid var(--border)",
-                  background: isCurrentlyPlaying ? "var(--accent-light)" : "transparent",
-                  transition: "background 0.2s",
+                  borderBottom: "var(--border-thin)",
+                  background: isCurrentlyPlaying ? "var(--accent-alt)" : "transparent",
                 }}
-                className="search-item"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={song.thumbnail_url}
                   alt=""
-                  style={{ width: "48px", height: "36px", objectFit: "cover", borderRadius: "4px" }}
+                  style={{ width: "44px", height: "32px", objectFit: "cover", border: "1px solid var(--ink)" }}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
+                    fontSize: "12px",
+                    fontWeight: 700,
                     margin: 0,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    color: isCurrentlyPlaying ? "#A78BFA" : "var(--text-primary)"
+                    color: "var(--ink)",
+                    fontFamily: "var(--font-mono)",
                   }}>
                     {song.song_title}
                   </h4>
                   <p style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
+                    fontSize: "11px",
+                    color: "var(--muted)",
                     margin: 0,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
-                    textOverflow: "ellipsis"
+                    textOverflow: "ellipsis",
+                    fontFamily: "var(--font-mono)",
                   }}>
                     {song.artist}
                   </p>
@@ -195,19 +194,19 @@ export default function MusicControls() {
                     type="button"
                     onClick={(e) => handleAddToQueue(e, song)}
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "16px" }}
-                    title="Add to Up Next Queue"
+                    style={{ fontSize: "10px", padding: "3px 8px" }}
+                    title="ADD TO QUEUE"
                   >
-                    ➕ Queue
+                    QUEUE [+]
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectSong(song)}
                     className="btn btn-primary btn-sm"
-                    style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "16px" }}
-                    title="Play Immediately"
+                    style={{ fontSize: "10px", padding: "3px 8px" }}
+                    title="PLAY IMMEDIATELY"
                   >
-                    ▶ Play
+                    PLAY [▶]
                   </button>
                 </div>
               </div>

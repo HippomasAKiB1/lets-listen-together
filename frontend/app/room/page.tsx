@@ -311,27 +311,26 @@ function RoomContent() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--bg-primary)",
-        color: "var(--text-secondary)",
+        background: "var(--bg)",
+        color: "var(--ink)",
+        padding: "24px",
       }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ marginBottom: "18px" }}>
-            <Image
-              src="/assets/app-logo-trans.png"
-              alt="TuneTogether Logo"
-              width={64}
-              height={64}
-              priority
-              style={{ objectFit: "contain", filter: "drop-shadow(0 6px 20px rgba(139,92,246,0.5))" }}
-              className="pulse-glow"
-            />
+        <div className="card" style={{ maxWidth: "420px", width: "100%", textAlign: "center", padding: "32px 24px" }}>
+          <div style={{
+            background: "var(--ink)",
+            color: "var(--accent-alt)",
+            border: "var(--border)",
+            padding: "16px",
+            fontSize: "14px",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+            marginBottom: "16px",
+          }}>
+            INITIALIZING SESSION [{roomId}]<span className="cursor-blink">_</span>
           </div>
-          <p style={{ fontSize: "16px", fontWeight: "700", color: "#F8FAFC" }}>
-            Connecting to TuneTogether room…
+          <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--muted)" }}>
+            ESTABLISHING WEBRTC AUDIO MESH & SYNCING QUEUE…
           </p>
-          <span style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
-            Syncing audio engine & WebRTC voice mesh
-          </span>
         </div>
       </div>
     );
@@ -342,45 +341,64 @@ function RoomContent() {
       height: "100vh",
       display: "flex",
       flexDirection: "column",
-      background: "var(--bg-primary)",
+      background: "var(--bg)",
+      color: "var(--ink)",
       overflow: "hidden",
     }}>
-      {/* Top Header */}
+      {/* ── TOP HEADER ── */}
       <header style={{
+        height: "56px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "12px 24px",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--bg-secondary)",
+        padding: "0 20px",
+        borderBottom: "var(--border)",
+        background: "var(--ink)",
+        color: "var(--ink-light)",
         zIndex: 5,
+        flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Image
-            src="/assets/app-logo-trans.png"
-            alt="TuneTogether Logo"
-            width={34}
-            height={34}
-            style={{ objectFit: "contain" }}
-          />
+          <div style={{
+            background: "var(--accent)",
+            border: "1px solid #FFFFFF",
+            padding: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "32px",
+            height: "32px",
+          }}>
+            <Image
+              src="/assets/app-logo-trans.png"
+              alt="TUNETOGETHER"
+              width={22}
+              height={22}
+              style={{ objectFit: "contain" }}
+            />
+          </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
-                {roomName || "Listening Room"}
+              <h2 style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "16px",
+                color: "#FFFFFF",
+                letterSpacing: "-0.01em",
+              }}>
+                {roomName || "LISTENING ROOM"}
               </h2>
             </div>
             <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "2px" }}>
-              <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Code:</span>
+              <span style={{ fontSize: "10px", color: "var(--muted-light)", fontFamily: "var(--font-mono)" }}>CODE:</span>
               <code style={{
-                background: "rgba(139, 92, 246, 0.15)",
-                border: "1px solid rgba(139, 92, 246, 0.3)",
-                padding: "2px 8px",
-                borderRadius: "4px",
-                fontSize: "12px",
-                fontWeight: "700",
+                background: "var(--accent-alt)",
+                color: "#0A0A0A",
+                border: "1px solid #0A0A0A",
+                padding: "1px 6px",
+                fontSize: "11px",
+                fontWeight: 900,
                 letterSpacing: "0.06em",
-                color: "#C4B5FD",
-                fontFamily: "monospace",
+                fontFamily: "var(--font-mono)",
               }}>
                 {inviteCode || "—"}
               </code>
@@ -388,19 +406,19 @@ function RoomContent() {
                 <>
                   <button
                     onClick={handleCopyCode}
-                    className="btn btn-ghost btn-sm"
-                    style={{ padding: "2px 8px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
-                    title="Copy Invite Code"
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "1px 6px", fontSize: "10px", height: "auto" }}
+                    title="COPY INVITE CODE"
                   >
-                    {copiedCode ? "✓ Copied" : "Copy"}
+                    {copiedCode ? "[✓] COPIED" : "COPY CODE"}
                   </button>
                   <button
                     onClick={handleCopyLink}
-                    className="btn btn-secondary btn-sm"
-                    style={{ padding: "2px 10px", height: "auto", fontSize: "11px", borderRadius: "14px", fontWeight: 600 }}
-                    title="Copy Direct Join Link"
+                    className="btn btn-primary btn-sm"
+                    style={{ padding: "1px 8px", fontSize: "10px", height: "auto" }}
+                    title="COPY DIRECT JOIN LINK"
                   >
-                    {copiedLink ? "✓ Link Copied!" : "🔗 Share Link"}
+                    {copiedLink ? "[✓] LINK COPIED" : "COPY LINK"}
                   </button>
                 </>
               )}
@@ -409,11 +427,11 @@ function RoomContent() {
         </div>
 
         <button onClick={handleLeaveRoom} className="btn btn-danger btn-sm">
-          {isHost ? "🔴 End Room" : "🚪 Leave Room"}
+          {isHost ? "END ROOM [x]" : "LEAVE ROOM [x]"}
         </button>
       </header>
 
-      {/* Main content grid */}
+      {/* ── MAIN CONTENT GRID ── */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         {/* Members List (Left) */}
         <MemberList />
@@ -424,7 +442,8 @@ function RoomContent() {
           display: "flex",
           flexDirection: "column",
           minWidth: 0,
-          background: "var(--bg-primary)",
+          background: "var(--bg)",
+          borderRight: "var(--border)",
         }}>
           {/* Mode switch */}
           <ModeSelector />
@@ -433,50 +452,51 @@ function RoomContent() {
           {currentSong.mode === "youtube" && <MusicControls />}
 
           {/* Player zone */}
-          <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+          <div style={{ flex: 1, minHeight: 0, position: "relative", background: "#000000" }}>
             {currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />}
             <FloatingReactions />
           </div>
 
           {/* Bottom Bar Controls */}
           <footer style={{
-            padding: "12px 24px",
-            borderTop: "1px solid var(--border)",
-            background: "var(--bg-secondary)",
+            height: "52px",
+            padding: "0 20px",
+            borderTop: "var(--border)",
+            background: "var(--surface)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             gap: "16px",
+            flexShrink: 0,
           }}>
             {/* Left: Mic toggle & status */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <button
                 onClick={handleMuteToggle}
                 className={`btn ${micMuted ? "btn-danger" : "btn-secondary"} btn-sm`}
                 id="footer-mute"
-                style={{ borderRadius: "20px", padding: "6px 14px", fontSize: "12px" }}
+                style={{ padding: "6px 12px", fontSize: "11px" }}
               >
-                {micMuted ? "🔇 Mic Muted" : "🎙️ Mic On"}
+                {micMuted ? "MIC MUTED [OFF]" : "MIC BROADCASTING [ON]"}
               </button>
               {micError && (
-                <span style={{ fontSize: "12px", color: "var(--warning)" }}>
-                  {micError}
+                <span style={{ fontSize: "11px", color: "var(--error)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                  [MIC_DENIED]
                 </span>
               )}
             </div>
 
-            {/* Center: Live Floating Reaction Emojis Bar */}
+            {/* Center: Live Flat Reaction Emojis Bar */}
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              background: "rgba(255, 255, 255, 0.05)",
-              padding: "3px 8px",
-              borderRadius: "20px",
-              border: "1px solid var(--border)",
+              gap: "4px",
+              background: "var(--bg)",
+              padding: "2px 6px",
+              border: "var(--border-thin)",
             }}>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", marginRight: "2px", fontWeight: 600 }}>
-                React:
+              <span style={{ fontSize: "10px", color: "var(--ink)", marginRight: "4px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                REACT:
               </span>
               {["🔥", "❤️", "😂", "👏", "🎉"].map((emoji) => (
                 <button
@@ -484,15 +504,13 @@ function RoomContent() {
                   onClick={() => handleSendReaction(emoji)}
                   className="btn btn-ghost btn-sm"
                   style={{
-                    fontSize: "16px",
+                    fontSize: "14px",
                     padding: "2px 6px",
                     height: "auto",
-                    borderRadius: "12px",
-                    transition: "transform 0.15s ease",
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.25)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  title={`Send ${emoji} reaction`}
+                  title={`SEND ${emoji} REACTION`}
                 >
                   {emoji}
                 </button>
@@ -500,10 +518,10 @@ function RoomContent() {
             </div>
 
             {/* Right: Queue button & branding */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <QueuePanel />
-              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                TuneTogether
+              <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--muted)" }}>
+                TUNETOGETHER // STEREO
               </span>
             </div>
           </footer>

@@ -16,7 +16,6 @@ export default function QueuePanel() {
     const socket = getSocketInstance();
     if (!socket) return;
 
-    // Remove from queue and play immediately
     socket.emit("remove_from_queue", { index });
     socket.emit("host_play", {
       video_id: item.video_id,
@@ -56,86 +55,91 @@ export default function QueuePanel() {
           display: "flex",
           alignItems: "center",
           gap: "6px",
-          borderRadius: "20px",
-          padding: "6px 14px",
-          fontSize: "12px",
-          fontWeight: 600,
-          background: isOpen ? "rgba(124, 58, 237, 0.2)" : undefined,
-          border: isOpen ? "1px solid var(--accent)" : undefined,
+          padding: "6px 12px",
+          fontSize: "11px",
+          background: isOpen ? "var(--accent)" : "var(--accent-alt)",
+          color: isOpen ? "#FFFFFF" : "var(--ink)",
         }}
-        title="View Up Next Queue"
+        title="VIEW UP NEXT QUEUE"
       >
-        <span>📑 Queue</span>
-        {queue.length > 0 && (
-          <span style={{
-            background: "var(--accent)",
-            color: "#fff",
-            borderRadius: "10px",
-            padding: "1px 7px",
-            fontSize: "10px",
-            fontWeight: 700,
-          }}>
-            {queue.length}
-          </span>
-        )}
+        <span>QUEUE</span>
+        <span style={{
+          background: "var(--ink)",
+          color: "var(--accent-alt)",
+          padding: "1px 6px",
+          fontSize: "10px",
+          fontWeight: 900,
+        }}>
+          {queue.length}
+        </span>
       </button>
 
-      {/* Dropdown / Modal Flyout */}
+      {/* Flyout Panel */}
       {isOpen && (
         <div
           style={{
             position: "absolute",
             bottom: "100%",
-            left: "0",
-            marginBottom: "12px",
-            width: "340px",
-            background: "var(--bg-secondary)",
-            border: "1px solid var(--border)",
-            borderRadius: "14px",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.7)",
+            right: "0",
+            marginBottom: "8px",
+            width: "360px",
+            background: "var(--surface)",
+            border: "var(--border)",
+            boxShadow: "var(--shadow-hard-lg)",
             padding: "16px",
-            zIndex: 30,
+            zIndex: 40,
             maxHeight: "380px",
             display: "flex",
             flexDirection: "column",
           }}
         >
+          {/* Header */}
           <div style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingBottom: "12px",
-            borderBottom: "1px solid var(--border)",
+            paddingBottom: "10px",
+            borderBottom: "var(--border)",
             marginBottom: "12px",
           }}>
-            <h4 style={{ fontSize: "14px", fontWeight: 700, margin: 0 }}>
-              Up Next ({queue.length})
+            <h4 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, margin: 0 }}>
+              UP NEXT QUEUE [{queue.length}]
             </h4>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
               {isHost && queue.length > 0 && (
                 <button
                   onClick={handleClear}
                   className="btn btn-ghost btn-sm"
-                  style={{ fontSize: "11px", color: "var(--error)", padding: "2px 6px" }}
+                  style={{ fontSize: "10px", color: "var(--error)", padding: "2px 6px" }}
                 >
-                  Clear All
+                  CLEAR ALL
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
                 className="btn btn-ghost btn-sm"
-                style={{ fontSize: "12px", padding: "2px 6px" }}
+                style={{ fontSize: "11px", padding: "2px 6px" }}
               >
-                ✕
+                [X]
               </button>
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+          {/* Items */}
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
             {queue.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "24px 12px", color: "var(--text-muted)", fontSize: "13px" }}>
-                No songs in queue yet.<br />
-                {isHost ? "Search a song and click '+ Queue' to queue it up!" : "Host can queue upcoming songs."}
+              <div style={{
+                textAlign: "center",
+                padding: "24px 12px",
+                color: "var(--muted)",
+                fontSize: "11px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                border: "1px dashed var(--ink)",
+                margin: "12px 0",
+              }}>
+                NO TRACKS IN QUEUE.<br />
+                {isHost ? "SEARCH A SONG TO QUEUE." : "WAITING FOR HOST TO QUEUE."}
               </div>
             ) : (
               queue.map((item, idx) => (
@@ -144,53 +148,53 @@ export default function QueuePanel() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
-                    padding: "8px 10px",
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
+                    gap: "8px",
+                    padding: "8px",
+                    background: "var(--bg)",
+                    border: "var(--border-thin)",
                   }}
                 >
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-muted)", width: "16px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 900, fontFamily: "var(--font-mono)", color: "var(--ink)", width: "18px" }}>
                     {idx + 1}
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.thumbnail_url}
                     alt=""
-                    style={{ width: "42px", height: "30px", borderRadius: "4px", objectFit: "cover" }}
+                    style={{ width: "42px", height: "30px", border: "1px solid var(--ink)", objectFit: "cover" }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--ink)",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}>
                       {item.song_title}
                     </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
+                    <div style={{ fontSize: "10px", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
                       {formatDuration(item.duration_seconds)}
                     </div>
                   </div>
 
                   {isHost && (
-                    <div style={{ display: "flex", gap: "4px" }}>
+                    <div style={{ display: "flex", gap: "2px" }}>
                       <button
                         onClick={() => handlePlayNow(item, idx)}
                         className="btn btn-ghost btn-sm"
-                        style={{ padding: "4px", fontSize: "12px" }}
-                        title="Play Now"
+                        style={{ padding: "2px 6px", fontSize: "11px" }}
+                        title="PLAY NOW"
                       >
                         ▶
                       </button>
                       <button
                         onClick={() => handleRemove(idx)}
                         className="btn btn-ghost btn-sm"
-                        style={{ padding: "4px", fontSize: "12px", color: "var(--error)" }}
-                        title="Remove"
+                        style={{ padding: "2px 6px", fontSize: "11px", color: "var(--error)" }}
+                        title="REMOVE"
                       >
                         ✕
                       </button>

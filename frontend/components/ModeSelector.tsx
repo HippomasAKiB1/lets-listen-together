@@ -28,7 +28,7 @@ export default function ModeSelector() {
         await startScreenShare(socket, useRoomStore.getState().roomId!);
       } catch (err: any) {
         console.error("Screenshare error:", err);
-        setError("Screen share cancelled or failed.");
+        setError("SCREENSHARE CANCELLED OR FAILED.");
         setSharing(false);
       }
     } else {
@@ -44,51 +44,47 @@ export default function ModeSelector() {
   return (
     <div style={{
       display: "flex",
-      flexDirection: "column",
-      gap: "8px",
       alignItems: "center",
-      justifyContent: "center",
-      padding: "12px 24px",
-      borderBottom: "1px solid var(--border)",
-      background: "rgba(22, 33, 62, 0.4)",
+      justifyContent: "space-between",
+      padding: "8px 16px",
+      borderBottom: "var(--border-thin)",
+      background: "var(--surface)",
+      color: "var(--ink)",
     }}>
       <div style={{
         display: "flex",
-        background: "var(--bg-secondary)",
-        borderRadius: "20px",
-        padding: "4px",
-        border: "1px solid var(--border)",
-        gap: "4px",
+        background: "var(--bg)",
+        border: "var(--border-thin)",
+        padding: "2px",
+        gap: "2px",
       }}>
         <button
           onClick={() => handleToggleMode("youtube")}
           className={`btn btn-sm ${!isScreenshare ? "btn-primary" : "btn-ghost"}`}
-          style={{ borderRadius: "16px", padding: "6px 16px", fontSize: "13px" }}
+          style={{ padding: "4px 12px", fontSize: "11px" }}
           disabled={isHost ? false : isScreenshare}
           id="mode-youtube"
         >
-          🎵 YouTube Sync
+          [▶] YOUTUBE SYNC
         </button>
         <button
           onClick={() => handleToggleMode("screenshare")}
           className={`btn btn-sm ${isScreenshare ? "btn-danger" : "btn-ghost"}`}
-          style={{ borderRadius: "16px", padding: "6px 16px", fontSize: "13px" }}
+          style={{ padding: "4px 12px", fontSize: "11px" }}
           disabled={isHost ? false : !isScreenshare}
           id="mode-screenshare"
         >
-          🖥️ Screenshare Mode
+          [🖥] SCREENSHARE
         </button>
       </div>
       
-      {error && (
-        <span style={{ fontSize: "12px", color: "var(--error)" }}>
+      {error ? (
+        <span style={{ fontSize: "11px", color: "var(--error)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
           {error}
         </span>
-      )}
-      
-      {!isHost && (
-        <span style={{ fontSize: "11px", color: "var(--text-muted)", fontStyle: "italic" }}>
-          Mode controlled by Host
+      ) : (
+        <span style={{ fontSize: "10px", color: "var(--muted)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+          {isHost ? "HOST CONTROLS ACTIVE" : "PLAYBACK CONTROLLED BY HOST"}
         </span>
       )}
     </div>

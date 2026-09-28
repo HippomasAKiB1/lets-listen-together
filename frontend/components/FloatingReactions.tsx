@@ -10,33 +10,32 @@ export default function FloatingReactions() {
   return (
     <div style={{
       position: "absolute",
-      right: "24px",
-      bottom: "32px",
+      right: "20px",
+      bottom: "24px",
       pointerEvents: "none",
       zIndex: 25,
       display: "flex",
       flexDirection: "column",
-      gap: "10px",
+      gap: "8px",
       alignItems: "flex-end",
     }}>
       {reactions.map((r) => (
         <div
           key={r.id}
           style={{
-            background: "rgba(22, 22, 22, 0.88)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            backdropFilter: "blur(10px)",
-            padding: "6px 14px",
-            borderRadius: "24px",
+            background: "var(--accent-alt)",
+            color: "var(--ink)",
+            border: "var(--border)",
+            boxShadow: "var(--shadow-hard-sm)",
+            padding: "4px 10px",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            animation: "reactionFloat 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.6)",
+            gap: "6px",
+            animation: "reactionFloat 3s ease-out forwards",
           }}
         >
-          <span style={{ fontSize: "22px", lineHeight: 1 }}>{r.emoji}</span>
-          <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
+          <span style={{ fontSize: "18px", lineHeight: 1 }}>{r.emoji}</span>
+          <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
             {r.username}
           </span>
         </div>
