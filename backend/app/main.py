@@ -24,10 +24,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure CORS for frontend deployments (supports any Vercel deployment, custom domain, and localhost)
+# Configure CORS: use regex to match any origin and echo it explicitly
+# (prevents '*' wildcard from conflicting with allow_credentials in browsers)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

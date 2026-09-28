@@ -40,12 +40,17 @@ export default function JoinRoomPage() {
       // Navigate to the room page
       router.push(`/room?id=${res.data.room_id}`);
     } catch (err: any) {
+      console.error("Join room failed:", err, err?.response?.data || err?.message);
       const detail = err?.response?.data?.detail;
       if (err?.response?.status === 401 || detail === "Not authenticated") {
         setError("Session expired or not authenticated. Please log in again.");
       } else if (err?.response?.status === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
         setPasswordRequired(true);
         setError("Password is required or incorrect for this room.");
+      } else if (err?.response?.status === 404) {
+        setError("Room not found. Please check the 5-character invite code.");
+      } else if (err?.response?.status === 409) {
+        setError("Room is currently full.");
       } else {
         let msg = "Failed to join room. Please check the code.";
         if (typeof detail === "string") {
@@ -53,7 +58,7 @@ export default function JoinRoomPage() {
         } else if (Array.isArray(detail) && detail.length > 0) {
           msg = detail[0]?.msg || msg;
         } else if (err?.message && !err?.response) {
-          msg = "Network error. Please make sure the backend server is running.";
+          msg = `Network or CORS error (${err.message}). Verify backend is reachable.`;
         }
         setError(msg);
       }
