@@ -23,6 +23,7 @@ import MusicControls from "@/components/MusicControls";
 import ModeSelector from "@/components/ModeSelector";
 import QueuePanel from "@/components/QueuePanel";
 import FloatingReactions from "@/components/FloatingReactions";
+import { REACTION_ITEMS } from "@/lib/reactions";
 import api from "@/lib/api";
 import { useRef } from "react";
 
@@ -476,33 +477,37 @@ function RoomContent() {
               )}
             </div>
 
-            {/* Center: Live Flat Reaction Emojis Bar */}
+            {/* Center: Live PNG Reaction Bar */}
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: "4px",
+              gap: "6px",
               background: "var(--bg)",
-              padding: "2px 6px",
+              padding: "3px 8px",
               border: "var(--border-thin)",
             }}>
-              <span style={{ fontSize: "10px", color: "var(--ink)", marginRight: "4px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+              <span style={{ fontSize: "10px", color: "var(--ink)", marginRight: "4px", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.5px" }}>
                 REACT:
               </span>
-              {["🔥", "❤️", "😂", "👏", "🎉"].map((emoji) => (
+              {REACTION_ITEMS.map((item) => (
                 <button
-                  key={emoji}
-                  onClick={() => handleSendReaction(emoji)}
-                  className="btn btn-ghost btn-sm"
-                  style={{
-                    fontSize: "14px",
-                    padding: "2px 6px",
-                    height: "auto",
-                    border: "1px solid var(--border)",
-                    background: "var(--surface)",
-                  }}
-                  title={`SEND ${emoji} REACTION`}
+                  key={item.id}
+                  onClick={() => handleSendReaction(item.id)}
+                  className="reaction-picker-btn"
+                  title={`SEND ${item.label.toUpperCase()} REACTION`}
+                  aria-label={`Send ${item.label} reaction`}
                 >
-                  {emoji}
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      objectFit: "contain",
+                      display: "block",
+                      pointerEvents: "none",
+                    }}
+                  />
                 </button>
               ))}
             </div>

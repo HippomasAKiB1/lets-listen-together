@@ -47,6 +47,10 @@ Built with an **Acid Brutalist / Industrial Swiss Grid** design aesthetic, Tune 
 - Clean room entry via 5-character invitation codes or one-click shareable links (`/invite/:code`).
 - Unauthenticated guests are automatically routed to sign in or register with their destination invite preserved, automatically joining the room immediately upon authentication.
 
+### 5. Custom Real-Time Floating Reactions
+- **Custom Graphic Reaction Bar**: Tactile reaction bar powered by custom graphic assets (Fire, Love, Haha, Clap, Bouquet) instead of generic system emojis.
+- **Synchronized Visual Feedback**: Reactions float and fade upward across all connected participants' screens in real time, accompanied by member attribution badges.
+
 ---
 
 ## System Architecture
@@ -166,7 +170,8 @@ Tune Together utilizes bidirectional Socket.IO events for state synchronization 
 | `sync_state` | Server → Client | `{ room_name, current_song, queue, members }` | Authoritative sync packet emitted on join. |
 | `add_to_queue`| Client → Server | `{ video_id, song_title, duration_seconds }` | Adds a track to the shared playlist. |
 | `toggle_mic` | Client → Server | `{ is_muted }` | Broadcasts microphone status change. |
-| `send_reaction`| Client → Server | `{ emoji }` | Emits a temporary floating reaction. |
+| `send_reaction`| Client → Server | `{ emoji }` | Emits a reaction to the room. |
+| `reaction_received` | Server → Client | `{ id, emoji, username }` | Broadcasts floating reaction badge to all peers. |
 | `webrtc_offer`| Bidirectional | `{ offer, from_sid, to_sid }` | Relays WebRTC SDP offer between peers. |
 | `webrtc_answer`| Bidirectional | `{ answer, from_sid, to_sid }` | Relays WebRTC SDP answer. |
 | `webrtc_ice` | Bidirectional | `{ candidate, from_sid, to_sid }` | Relays ICE candidate exchange. |
