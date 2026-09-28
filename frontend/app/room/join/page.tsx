@@ -43,7 +43,7 @@ export default function JoinRoomPage() {
         setError("Session expired or not authenticated. Please log in again.");
       } else if (err?.response?.status === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
         setPasswordRequired(true);
-        setError("Password is required for this room.");
+        setError("Password is required or incorrect for this room.");
       } else {
         let msg = "Failed to join room. Please check the code.";
         if (typeof detail === "string") {
@@ -108,22 +108,19 @@ export default function JoinRoomPage() {
               />
             </div>
 
-            {(passwordRequired || password) && (
-              <div className="fade-in">
-                <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                  Room Password
-                </label>
-                <input
-                  className="input"
-                  type="password"
-                  placeholder="Enter room password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  id="join-room-password"
-                />
-              </div>
-            )}
+            <div>
+              <label className="label" style={{ display: "block", marginBottom: "8px" }}>
+                Room Password <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: "normal" }}>(Optional)</span>
+              </label>
+              <input
+                className="input"
+                type="password"
+                placeholder="Enter password if room is protected"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                id="join-room-password"
+              />
+            </div>
 
             {error && <p className="error-text">{error}</p>}
 

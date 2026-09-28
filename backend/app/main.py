@@ -11,29 +11,6 @@ from app.sockets.hub import sio
 
 load_dotenv()
 
-# Configure CORS for different frontend deployments
-RENDER_FRONTEND_URL = os.getenv("FRONTEND_URL", "https://tunetogether-six.vercel.app")
-ALLOWED_FRONTEND_URLS = [
-    "https://tunetogether-six.vercel.app",  # Vercel frontend
-    "https://tunetogether.vercel.app",      # Alternative Vercel frontend
-    RENDER_FRONTEND_URL,                    # Render's FRONTEND_URL config (if set to frontend)
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-]
-
-# Normalize origins to prevent CORS issues with trailing slashes
-origins = []
-for o in ALLOWED_FRONTEND_URLS:
-    if o:
-        origins.append(o)
-        if o.endswith("/"):
-            origins.append(o.rstrip("/"))
-        else:
-            origins.append(o + "/")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -47,9 +24,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configure CORS for frontend deployments (supports any Vercel deployment, custom domain, and localhost)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
