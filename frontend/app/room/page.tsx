@@ -9,6 +9,7 @@ import {
   initLocalStream,
   stopLocalStream,
   createPeer,
+  getPeer,
   destroyAllPeers,
   setMuted,
   cleanupAudio,
@@ -114,22 +115,32 @@ function RoomContent() {
 
         // WebRTC Signaling Relay
         socket.on("webrtc_offer", (data: any) => {
-          const peer = createPeer(data.from_sid, data.user_id, data.username, false, socket);
+          let peer = getPeer(data.from_sid);
+          if (!peer) {
+            peer = createPeer(data.from_sid, data.user_id, data.username, false, socket);
+          }
           peer.signal(data.signal);
         });
 
         socket.on("webrtc_answer", (data: any) => {
-          const peer = createPeer(data.from_sid, data.user_id, data.username, false, socket);
-          peer.signal(data.signal);
+          const peer = getPeer(data.from_sid);
+          if (peer) {
+            peer.signal(data.signal);
+          }
         });
 
         socket.on("webrtc_ice", (data: any) => {
-          const peer = createPeer(data.from_sid, data.user_id, data.username, false, socket);
-          peer.signal(data.signal);
+          const peer = getPeer(data.from_sid);
+          if (peer) {
+            peer.signal(data.signal);
+          }
         });
 
         socket.on("initiate_peer", (data: any) => {
-          createPeer(data.sid, data.user_id, data.username, true, socket);
+          let peer = getPeer(data.sid);
+          if (!peer) {
+            createPeer(data.sid, data.user_id, data.username, true, socket);
+          }
         });
 
         // Sync Music states

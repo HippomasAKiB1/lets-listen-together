@@ -2,13 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRoomStore } from "@/store/roomStore";
+import { useAuthStore } from "@/store/authStore";
+import { getScreenshareStream } from "@/lib/webrtc";
 
 export default function ScreenShareViewer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const { currentSong } = useRoomStore();
+  const { currentSong, hostId } = useRoomStore();
+  const { userId } = useAuthStore();
+  const isHost = userId === hostId;
 
   useEffect(() => {
+    // Check if a stream is already active (e.g. host started sharing before viewer mounted, or remote stream stored)
+    const existing = getScreenshareStream();
+    if (existing) {
+      setStream(existing);
+    }
+
     const handleStream = (e: Event) => {
       const customEvent = e as CustomEvent<{ stream: MediaStream; sid: string }>;
       setStream(customEvent.detail.stream);
@@ -30,6 +40,7 @@ export default function ScreenShareViewer() {
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
+      videoRef.current.play().catch((err) => console.warn("Video play error:", err));
     }
   }, [stream]);
 
@@ -72,6 +83,7 @@ export default function ScreenShareViewer() {
         ref={videoRef}
         autoPlay
         playsInline
+        muted={isHost}
         style={{
           width: "100%",
           height: "100%",

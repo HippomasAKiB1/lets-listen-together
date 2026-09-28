@@ -18,10 +18,15 @@ type PeerEntry = {
 const peers: Map<string, PeerEntry> = new Map(); // sid → peer
 let localStream: MediaStream | null = null;
 let screenshareStream: MediaStream | null = null;
+let remoteScreenshareStream: MediaStream | null = null;
 let audioContext: AudioContext | null = null;
 let musicGainNode: GainNode | null = null;
 let voiceActive = false;
 let voiceTimeout: ReturnType<typeof setTimeout> | null = null;
+
+export function getScreenshareStream(): MediaStream | null {
+  return screenshareStream || remoteScreenshareStream;
+}
 
 // ── Local stream ──────────────────────────────────────────────────────────
 
@@ -57,6 +62,17 @@ export function createPeer(
     },
   });
 
+  // If host is already sharing screen when this peer connection is created, attach it
+  if (screenshareStream) {
+    screenshareStream.getTracks().forEach((track) => {
+      try {
+        peer.addTrack(track, screenshareStream!);
+      } catch (e) {
+        console.warn("Could not attach screenshare track to new peer", e);
+      }
+    });
+  }
+
   peer.on("signal", (signalData) => {
     if (signalData.type === "offer") {
       socket.emit("webrtc_offer", { target_sid: targetSid, signal: signalData });
@@ -82,6 +98,7 @@ export function createPeer(
   peer.on("track", (track, remoteStream) => {
     // Handle screenshare video tracks
     if (track.kind === "video") {
+      remoteScreenshareStream = remoteStream;
       const event = new CustomEvent("screenshare-stream", {
         detail: { stream: remoteStream, sid: targetSid },
       });
@@ -115,6 +132,7 @@ export function destroyAllPeers() {
     audio?.remove();
   });
   peers.clear();
+  remoteScreenshareStream = null;
 }
 
 export function getPeer(sid: string): Peer.Instance | undefined {
@@ -167,6 +185,7 @@ export async function startScreenShare(socket: Socket, roomId: string): Promise<
 export function stopScreenShare(socket: Socket) {
   screenshareStream?.getTracks().forEach((t) => t.stop());
   screenshareStream = null;
+  remoteScreenshareStream = null;
   window.dispatchEvent(new CustomEvent("screenshare-ended"));
   socket.emit("screenshare_ended", {});
 }

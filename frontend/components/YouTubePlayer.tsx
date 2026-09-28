@@ -14,101 +14,122 @@ declare global {
 }
 
 export default function YouTubePlayer() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isSyncingRef = useRef<boolean>(false);
+  const mountedRef = useRef<boolean>(false);
 
   const { userId } = useAuthStore();
-  const { currentSong, hostId, setCurrentSong } = useRoomStore();
+  const { currentSong, hostId } = useRoomStore();
   const isHost = userId === hostId;
 
   const [playerReady, setPlayerReady] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(70);
   const [isDucked, setIsDucked] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
-  // 1. Load YouTube IFrame API
+  // Initialize YouTube Iframe API
   useEffect(() => {
-    if (window.YT) {
-      initPlayer();
-      return;
-    }
+    mountedRef.current = true;
 
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    window.onYouTubeIframeAPIReady = () => {
-      initPlayer();
+    const checkAndInit = () => {
+      if (window.YT && window.YT.Player) {
+        initPlayer();
+        return true;
+      }
+      return false;
     };
 
+    if (checkAndInit()) return;
+
+    // Load the IFrame Player API code asynchronously.
+    if (!document.getElementById("yt-iframe-api-script")) {
+      const tag = document.createElement("script");
+      tag.id = "yt-iframe-api-script";
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+
+    const prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (prevReady) prevReady();
+      if (mountedRef.current) initPlayer();
+    };
+
+    // Polling fallback in case onYouTubeIframeAPIReady already fired
+    const interval = setInterval(() => {
+      if (checkAndInit()) {
+        clearInterval(interval);
+      }
+    }, 200);
+
     return () => {
-      window.onYouTubeIframeAPIReady = undefined;
+      mountedRef.current = false;
+      clearInterval(interval);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
   }, []);
 
   const initPlayer = () => {
-    if (!containerRef.current) return;
+    if (!document.getElementById("yt-player-iframe") || playerRef.current) return;
 
-    playerRef.current = new window.YT.Player("yt-player-iframe", {
-      height: "0", // Hidden video player, or small thumbnail size
-      width: "0",
-      videoId: currentSong.video_id || "",
-      playerVars: {
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        rel: 0,
-        showinfo: 0,
-      },
-      events: {
-        onReady: () => {
-          setPlayerReady(true);
-          playerRef.current.setVolume(volume);
+    try {
+      playerRef.current = new window.YT.Player("yt-player-iframe", {
+        width: "100%",
+        height: "100%",
+        videoId: currentSong.video_id || "",
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          enablejsapi: 1,
+          modestbranding: 1,
+          rel: 0,
+          origin: typeof window !== "undefined" ? window.location.origin : undefined,
         },
-        onStateChange: (event: any) => {
-          // If state changes manually and we are not syncing, and we are host, broadcast command
-          if (isHost && !isSyncingRef.current) {
-            const socket = getSocketInstance();
-            if (!socket) return;
-            const state = event.data;
-
-            if (state === window.YT.PlayerState.PLAYING) {
-              const currentPosMs = Math.round(playerRef.current.getCurrentTime() * 1000);
-              socket.emit("host_play", {
-                video_id: currentSong.video_id,
-                song_title: currentSong.song_title,
-                artist: currentSong.artist,
-                thumbnail_url: currentSong.thumbnail_url,
-                duration_seconds: currentSong.duration_seconds,
-                position_ms: currentPosMs,
-              });
-            } else if (state === window.YT.PlayerState.PAUSED) {
-              const currentPosMs = Math.round(playerRef.current.getCurrentTime() * 1000);
-              socket.emit("host_pause", { position_ms: currentPosMs });
+        events: {
+          onReady: (event: any) => {
+            setPlayerReady(true);
+            try {
+              event.target.setVolume(volume);
+            } catch {}
+          },
+          onStateChange: (event: any) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setAutoplayBlocked(false);
             }
-          }
+            if (isHost && !isSyncingRef.current) {
+              const socket = getSocketInstance();
+              if (!socket) return;
+              if (event.data === window.YT.PlayerState.PAUSED) {
+                const currentPosMs = Math.round((playerRef.current?.getCurrentTime?.() || 0) * 1000);
+                socket.emit("host_pause", { position_ms: currentPosMs });
+              }
+            }
+          },
+          onError: (e: any) => {
+            console.warn("YouTube Player error:", e?.data);
+          },
         },
-      },
-    });
+      });
+    } catch (e) {
+      console.warn("Failed to instantiate YT.Player", e);
+    }
   };
 
-  // Setup Voice Activity Callback for Ducking
+  // Voice Ducking (smoothly lower volume when speaking)
   useEffect(() => {
     setVoiceCallback((speaking) => {
       if (!playerRef.current || !playerReady) return;
       setIsDucked(speaking);
-      if (speaking) {
-        // Duck volume to 40% of the currently selected volume
-        playerRef.current.setVolume(Math.round(volume * 0.4));
-      } else {
-        // Restore volume
-        playerRef.current.setVolume(volume);
-      }
+      try {
+        if (speaking) {
+          playerRef.current.setVolume(Math.round(volume * 0.4));
+        } else {
+          playerRef.current.setVolume(volume);
+        }
+      } catch {}
     });
 
     return () => {
@@ -118,77 +139,89 @@ export default function YouTubePlayer() {
 
   // Synchronize player with currentSong store updates
   useEffect(() => {
-    if (!playerReady || !playerRef.current) return;
+    if (!playerReady || !playerRef.current || !playerRef.current.loadVideoById) return;
 
-    // Set syncing flag synchronously BEFORE any player operation,
-    // so onStateChange does not fire spurious host_pause/host_play events.
+    const videoId = currentSong.video_id;
+    if (!videoId) {
+      try { playerRef.current.stopVideo?.(); } catch {}
+      return;
+    }
+
     isSyncingRef.current = true;
 
-    const syncPlayer = async () => {
-      const loadedVideoId = playerRef.current.getVideoData?.()?.video_id;
-      const targetVideoId = currentSong.video_id;
+    // Calculate synchronized position
+    let targetPosMs = currentSong.position_ms || 0;
+    if (currentSong.is_playing && currentSong.server_timestamp > 0) {
+      const elapsed = Date.now() - currentSong.server_timestamp;
+      targetPosMs += elapsed;
+    }
+    const targetPosSec = Math.max(0, targetPosMs / 1000);
 
-      // 1. Handle song change
-      if (targetVideoId && loadedVideoId !== targetVideoId) {
-        // cueVideoById triggers PAUSED state — isSyncingRef guards against
-        // the onStateChange handler broadcasting a spurious host_pause.
-        playerRef.current.cueVideoById(targetVideoId);
-      }
+    const loadedId = playerRef.current.getVideoData?.()?.video_id;
 
-      if (!targetVideoId) {
-        playerRef.current.stopVideo();
-        // Hold the flag a moment so the resulting state change is swallowed
-        setTimeout(() => { isSyncingRef.current = false; }, 500);
-        return;
-      }
-
-      // Calculate synchronized position
-      let targetPosMs = currentSong.position_ms;
-      if (currentSong.is_playing && currentSong.server_timestamp > 0) {
-        const elapsed = Date.now() - currentSong.server_timestamp;
-        targetPosMs += elapsed;
-      }
-      const targetPosSec = targetPosMs / 1000;
-
-      // 2. Play or Pause
+    if (loadedId !== videoId) {
       if (currentSong.is_playing) {
-        const currentPosSec = playerRef.current.getCurrentTime();
-        // Allow tiny drift, sync if drift is > 2 seconds
-        if (Math.abs(currentPosSec - targetPosSec) > 2) {
-          playerRef.current.seekTo(targetPosSec, true);
-        }
-        playerRef.current.playVideo();
+        try {
+          playerRef.current.loadVideoById({
+            videoId: videoId,
+            startSeconds: targetPosSec,
+          });
+        } catch {}
       } else {
-        playerRef.current.seekTo(targetPosSec, true);
-        playerRef.current.pauseVideo();
+        try {
+          playerRef.current.cueVideoById({
+            videoId: videoId,
+            startSeconds: targetPosSec,
+          });
+        } catch {}
+      }
+    } else {
+      const currentPosSec = playerRef.current.getCurrentTime?.() || 0;
+      if (Math.abs(currentPosSec - targetPosSec) > 2) {
+        try { playerRef.current.seekTo?.(targetPosSec, true); } catch {}
       }
 
-      // Release the sync lock after a short delay so player state changes settle
-      setTimeout(() => { isSyncingRef.current = false; }, 500);
-    };
+      if (currentSong.is_playing) {
+        const state = playerRef.current.getPlayerState?.();
+        if (state !== 1) { // 1 = PLAYING
+          try {
+            const playPromise = playerRef.current.playVideo?.();
+            if (playPromise && playPromise.catch) {
+              playPromise.catch(() => setAutoplayBlocked(true));
+            }
+          } catch {
+            setAutoplayBlocked(true);
+          }
+        }
+      } else {
+        const state = playerRef.current.getPlayerState?.();
+        if (state !== 2) { // 2 = PAUSED
+          try { playerRef.current.pauseVideo?.(); } catch {}
+        }
+      }
+    }
 
-    syncPlayer();
+    setTimeout(() => {
+      isSyncingRef.current = false;
+    }, 600);
   }, [currentSong, playerReady]);
 
-  // Progress update timer
+  // Progress update interval
   useEffect(() => {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
     progressIntervalRef.current = setInterval(() => {
       if (!playerReady || !playerRef.current || !currentSong.video_id) return;
-
       try {
-        const currentTime = playerRef.current.getCurrentTime();
+        const currentTime = playerRef.current.getCurrentTime?.() || 0;
         setLocalProgress(currentTime);
 
-        // If host, let's keep database progress synced every 5 seconds
+        // Keep database progress synced periodically by host
         if (isHost && currentSong.is_playing && Math.random() < 0.2) {
           const socket = getSocketInstance();
           socket?.emit("host_seek", { position_ms: Math.round(currentTime * 1000) });
         }
-      } catch (err) {
-        // Player might not be fully active yet
-      }
+      } catch {}
     }, 1000);
 
     return () => {
@@ -196,13 +229,13 @@ export default function YouTubePlayer() {
     };
   }, [playerReady, currentSong.video_id, currentSong.is_playing, isHost]);
 
-  // Handle local control triggers (e.g. clicking Play/Pause buttons in custom UI)
+  // Controls
   const togglePlayPause = () => {
     if (!playerReady || !playerRef.current) return;
     const socket = getSocketInstance();
     if (!socket) return;
 
-    const currentPosMs = Math.round(playerRef.current.getCurrentTime() * 1000);
+    const currentPosMs = Math.round((playerRef.current.getCurrentTime?.() || 0) * 1000);
 
     if (currentSong.is_playing) {
       socket.emit("host_pause", { position_ms: currentPosMs });
@@ -223,8 +256,7 @@ export default function YouTubePlayer() {
 
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = clickX / width;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
     const targetSeconds = percentage * currentSong.duration_seconds;
 
     const socket = getSocketInstance();
@@ -237,7 +269,20 @@ export default function YouTubePlayer() {
     const val = Number(e.target.value);
     setVolume(val);
     if (playerReady && playerRef.current) {
-      playerRef.current.setVolume(isDucked ? Math.round(val * 0.4) : val);
+      try {
+        playerRef.current.setVolume(isDucked ? Math.round(val * 0.4) : val);
+        playerRef.current.unMute?.();
+      } catch {}
+    }
+  };
+
+  const handleManualPlay = () => {
+    if (playerRef.current) {
+      try {
+        playerRef.current.playVideo?.();
+        playerRef.current.unMute?.();
+      } catch {}
+      setAutoplayBlocked(false);
     }
   };
 
@@ -251,64 +296,87 @@ export default function YouTubePlayer() {
     <div style={{
       display: "flex",
       flexDirection: "column",
-      gap: "24px",
+      gap: "20px",
       alignItems: "center",
       justifyContent: "center",
       height: "100%",
       padding: "20px",
+      width: "100%",
     }}>
-      {/* Hidden YouTube Iframe holder */}
-      <div ref={containerRef} style={{ display: "none" }}>
-        <div id="yt-player-iframe"></div>
+      {/* Video player container — always kept in DOM so YT iframe is measurable and initialized */}
+      <div style={{
+        position: currentSong.video_id ? "relative" : "absolute",
+        left: currentSong.video_id ? "auto" : "-9999px",
+        opacity: currentSong.video_id ? 1 : 0,
+        pointerEvents: currentSong.video_id ? "auto" : "none",
+        width: "100%",
+        maxWidth: "600px",
+        aspectRatio: "16/9",
+        borderRadius: "16px",
+        overflow: "hidden",
+        boxShadow: "0 16px 48px rgba(0,0,0,0.6), 0 0 40px var(--accent-light)",
+        border: "1px solid var(--border)",
+        background: "#000",
+      }}>
+        <div id="yt-player-iframe" style={{ width: "100%", height: "100%" }}></div>
+
+        {isDucked && (
+          <div style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            background: "rgba(12, 12, 12, 0.8)",
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontSize: "12px",
+            fontWeight: "600",
+            color: "#A78BFA",
+            backdropFilter: "blur(4px)",
+            pointerEvents: "none",
+            zIndex: 5,
+          }}>
+            🎤 Ducking active (40%)
+          </div>
+        )}
+
+        {autoplayBlocked && (
+          <div
+            onClick={handleManualPlay}
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(15, 15, 15, 0.85)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+              cursor: "pointer",
+              zIndex: 10,
+            }}
+          >
+            <button className="btn btn-primary" style={{ padding: "12px 24px", fontSize: "15px" }}>
+              ▶ Click to Sync Audio
+            </button>
+            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+              Browser blocked background audio
+            </span>
+          </div>
+        )}
       </div>
 
       {currentSong.video_id ? (
         <div className="fade-in" style={{
           width: "100%",
-          maxWidth: "480px",
+          maxWidth: "600px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "20px",
+          gap: "16px",
         }}>
-          {/* Album Art / Video Thumbnail */}
-          <div style={{
-            position: "relative",
-            width: "240px",
-            height: "240px",
-            borderRadius: "16px",
-            overflow: "hidden",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.5), 0 0 40px var(--accent-light)",
-            border: "1px solid var(--border)",
-            background: "var(--bg-secondary)",
-          }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={currentSong.thumbnail_url || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80"}
-              alt="Track Artwork"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-            {isDucked && (
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(12, 12, 12, 0.7)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "14px",
-                fontWeight: "600",
-                color: "#A78BFA",
-                backdropFilter: "blur(2px)",
-              }}>
-                🎤 Ducking active
-              </div>
-            )}
-          </div>
-
           {/* Track Info */}
           <div style={{ textAlign: "center" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "4px" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "800", marginBottom: "4px" }}>
               {currentSong.song_title || "Unknown Title"}
             </h3>
             <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
@@ -348,10 +416,10 @@ export default function YouTubePlayer() {
               <button
                 onClick={togglePlayPause}
                 className="btn btn-primary"
-                style={{ borderRadius: "50%", width: "64px", height: "64px", padding: 0 }}
+                style={{ borderRadius: "50%", width: "56px", height: "56px", padding: 0 }}
                 id="player-play-pause"
               >
-                <span style={{ fontSize: "24px" }}>{currentSong.is_playing ? "⏸" : "▶"}</span>
+                <span style={{ fontSize: "22px" }}>{currentSong.is_playing ? "⏸" : "▶"}</span>
               </button>
             ) : (
               <div style={{
@@ -377,7 +445,7 @@ export default function YouTubePlayer() {
                 onChange={handleVolumeChange}
                 style={{
                   WebkitAppearance: "none",
-                  width: "80px",
+                  width: "90px",
                   height: "4px",
                   background: "var(--border)",
                   borderRadius: "2px",
@@ -396,7 +464,7 @@ export default function YouTubePlayer() {
           gap: "12px",
         }}>
           <span style={{ fontSize: "48px" }}>📻</span>
-          <p style={{ fontSize: "14px" }}>
+          <p style={{ fontSize: "15px", fontWeight: "500" }}>
             {isHost ? "Search and play a song to start listening" : "Waiting for the host to play a song..."}
           </p>
         </div>
