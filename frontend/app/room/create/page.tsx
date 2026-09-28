@@ -17,8 +17,10 @@ export default function CreateRoomPage() {
   // After creation
   const [createdRoom, setCreatedRoom] = useState<{ room_id: string; invite_code: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated()) {
       router.push("/");
     }
@@ -59,7 +61,7 @@ export default function CreateRoomPage() {
     }
   };
 
-  if (!isAuthenticated()) return null;
+  if (!mounted || !isAuthenticated()) return null;
 
   return (
     <div style={{

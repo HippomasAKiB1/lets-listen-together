@@ -17,8 +17,10 @@ export default function JoinRoomPage() {
   
   // To handle if password is required after first attempt
   const [passwordRequired, setPasswordRequired] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated()) {
       router.push("/");
     }
@@ -60,7 +62,7 @@ export default function JoinRoomPage() {
     }
   };
 
-  if (!isAuthenticated()) return null;
+  if (!mounted || !isAuthenticated()) return null;
 
   return (
     <div style={{

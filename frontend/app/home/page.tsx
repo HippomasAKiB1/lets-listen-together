@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 
 export default function HomePage() {
   const router = useRouter();
   const { username, clearAuth, isAuthenticated } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated()) {
       router.push("/");
     }
@@ -19,7 +21,7 @@ export default function HomePage() {
     router.push("/");
   };
 
-  if (!isAuthenticated()) return null;
+  if (!mounted || !isAuthenticated()) return null;
 
   return (
     <div style={{
