@@ -37,8 +37,22 @@ if DATABASE_URL:
             query = dict(url.query)
             if "sslmode" in query:
                 query["ssl"] = query.pop("sslmode")
-                url = url.set(query=query)
-                DATABASE_URL = url.render_as_string(hide_password=False)
+            if "connect_timeout" in query:
+                query["timeout"] = query.pop("connect_timeout")
+
+            # Neon and libpq connection strings can include channel_binding or other
+            # options that asyncpg.connect does not accept as keyword arguments
+            VALID_ASYNCPG_KEYS = {
+                "host", "port", "user", "password", "passfile", "service", "servicefile",
+                "database", "loop", "timeout", "statement_cache_size", "max_cached_statement_lifetime",
+                "max_cacheable_statement_size", "command_timeout", "ssl", "direct_tls",
+                "connection_class", "record_class", "server_settings", "target_session_attrs",
+                "krbsrvname", "gsslib", "prepared_statement_cache_size", "prepared_statement_name_func",
+                "async_fallback", "async_creator_fn"
+            }
+            clean_query = {k: v for k, v in query.items() if k in VALID_ASYNCPG_KEYS}
+            url = url.set(query=clean_query)
+            DATABASE_URL = url.render_as_string(hide_password=False)
 
             engine_kwargs["pool_size"] = 5
             engine_kwargs["max_overflow"] = 10
