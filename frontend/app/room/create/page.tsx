@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { useRoomStore } from "@/store/roomStore";
 import api from "@/lib/api";
@@ -18,13 +20,14 @@ export default function CreateRoomPage() {
   
   // After creation
   const [createdRoom, setCreatedRoom] = useState<{ room_id: string; invite_code: string } | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     if (!isAuthenticated()) {
-      router.push("/");
+      router.push("/login?redirect=/room/create");
     }
   }, [isAuthenticated, router]);
 
@@ -63,11 +66,20 @@ export default function CreateRoomPage() {
     }
   };
 
-  const handleCopy = () => {
+  const handleCopyCode = () => {
     if (createdRoom) {
       navigator.clipboard.writeText(createdRoom.invite_code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (createdRoom) {
+      const link = `${window.location.origin}/invite/${createdRoom.invite_code}`;
+      navigator.clipboard.writeText(link);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
@@ -79,33 +91,45 @@ export default function CreateRoomPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.1) 0%, #0F0F0F 85%)",
+      background: "radial-gradient(circle at 50% 15%, rgba(139, 92, 246, 0.14) 0%, #08080C 80%)",
       padding: "24px",
+      position: "relative",
     }}>
-      <div className="fade-in" style={{ width: "100%", maxWidth: "440px" }}>
+      <div className="fade-in" style={{ width: "100%", maxWidth: "460px", position: "relative", zIndex: 2 }}>
         
         {/* Navigation back */}
         {!createdRoom && (
-          <button
-            onClick={() => router.push("/home")}
+          <Link
+            href="/home"
             className="btn btn-ghost btn-sm"
-            style={{ marginBottom: "16px", paddingLeft: 0 }}
+            style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
           >
-            ← Back to Home
-          </button>
+            <span>←</span> Back to Dashboard
+          </Link>
         )}
 
-        <div className="card" style={{ padding: "32px" }}>
+        <div className="card card-glow" style={{ padding: "34px 30px" }}>
           {!createdRoom ? (
             <>
-              <h2 style={{ fontSize: "22px", fontWeight: "800", marginBottom: "8px" }}>
-                Create a Room
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px" }}>
-                Configure your room details below.
-              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "22px" }}>
+                <Image
+                  src="/assets/app-logo-trans.png"
+                  alt="TuneTogether Logo"
+                  width={38}
+                  height={38}
+                  style={{ objectFit: "contain" }}
+                />
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "800", letterSpacing: "-0.01em" }}>
+                    Create a Room
+                  </h2>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "13px" }}>
+                    Set up your synchronized listening room.
+                  </p>
+                </div>
+              </div>
 
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
                 <div>
                   <label className="label" style={{ display: "block", marginBottom: "8px" }}>
                     Room Name
@@ -113,18 +137,19 @@ export default function CreateRoomPage() {
                   <input
                     className="input"
                     type="text"
-                    placeholder="e.g., Late Night Vibes"
+                    placeholder="e.g. Late Night Lo-Fi Sanctuary"
                     value={roomName}
                     onChange={(e) => setRoomName(e.target.value)}
                     required
                     maxLength={64}
+                    autoFocus
                     id="create-room-name"
                   />
                 </div>
 
                 <div>
                   <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                    Room Password (optional)
+                    Room Password <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "none" }}>(Optional)</span>
                   </label>
                   <input
                     className="input"
@@ -162,40 +187,58 @@ export default function CreateRoomPage() {
                   className="btn btn-primary"
                   disabled={loading}
                   id="create-room-submit"
-                  style={{ width: "100%", marginTop: "8px", padding: "14px" }}
+                  style={{ width: "100%", marginTop: "6px", padding: "14px" }}
                 >
                   {loading ? "Creating Room…" : "Create Room"}
                 </button>
               </form>
             </>
           ) : (
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "40px", marginBottom: "16px" }}>🎉</div>
-              <h2 style={{ fontSize: "22px", fontWeight: "800", marginBottom: "8px" }}>
+            <div style={{ textAlign: "center", padding: "10px 0" }}>
+              <div style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "26px",
+                margin: "0 auto 16px",
+              }}>
+                🎉
+              </div>
+              <h2 style={{ fontSize: "22px", fontWeight: "800", marginBottom: "6px" }}>
                 Room Created!
               </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px" }}>
-                Share this invite code with your friends.
+              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "22px" }}>
+                Share your invite link or 5-letter code with friends:
               </p>
 
               <div style={{
-                background: "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                borderRadius: "12px",
-                padding: "20px",
+                background: "rgba(10, 10, 14, 0.8)",
+                border: "1px solid rgba(139, 92, 246, 0.35)",
+                borderRadius: "14px",
+                padding: "18px",
                 fontSize: "32px",
                 fontWeight: "800",
                 letterSpacing: "0.2em",
-                color: "#A78BFA",
-                textIndent: "0.2em", // Center offset correction for letter spacing
+                color: "#C4B5FD",
+                fontFamily: "monospace",
+                textIndent: "0.2em",
                 marginBottom: "16px",
+                boxShadow: "0 0 25px rgba(139, 92, 246, 0.2)",
               }}>
                 {createdRoom.invite_code}
               </div>
 
-              <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "24px" }}>
-                <button onClick={handleCopy} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
-                  {copied ? "Copied! ✓" : "Copy Code"}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "24px" }}>
+                <button onClick={handleCopyCode} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
+                  {copiedCode ? "✓ Code Copied" : "Copy Code"}
+                </button>
+                <button onClick={handleCopyLink} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
+                  {copiedLink ? "✓ Link Copied!" : "🔗 Copy Invite Link"}
                 </button>
               </div>
 
@@ -205,7 +248,7 @@ export default function CreateRoomPage() {
                 style={{ width: "100%", padding: "14px" }}
                 id="create-room-enter"
               >
-                Enter Room
+                Enter Room →
               </button>
             </div>
           )}

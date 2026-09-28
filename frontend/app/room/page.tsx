@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 import { useRoomStore, Member } from "@/store/roomStore";
 import { getSocket, disconnectSocket } from "@/lib/socket";
@@ -276,7 +277,7 @@ function RoomContent() {
 
   const handleCopyLink = () => {
     if (!inviteCode) return;
-    const url = `${window.location.origin}/room/join?code=${inviteCode}`;
+    const url = `${window.location.origin}/invite/${inviteCode}`;
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -314,8 +315,23 @@ function RoomContent() {
         color: "var(--text-secondary)",
       }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "36px", marginBottom: "16px" }}>🌀</div>
-          <p>Connecting to TuneTogether room...</p>
+          <div style={{ marginBottom: "18px" }}>
+            <Image
+              src="/assets/app-logo-trans.png"
+              alt="TuneTogether Logo"
+              width={64}
+              height={64}
+              priority
+              style={{ objectFit: "contain", filter: "drop-shadow(0 6px 20px rgba(139,92,246,0.5))" }}
+              className="pulse-glow"
+            />
+          </div>
+          <p style={{ fontSize: "16px", fontWeight: "700", color: "#F8FAFC" }}>
+            Connecting to TuneTogether room…
+          </p>
+          <span style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+            Syncing audio engine & WebRTC voice mesh
+          </span>
         </div>
       </div>
     );
@@ -334,52 +350,61 @@ function RoomContent() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "14px 24px",
+        padding: "12px 24px",
         borderBottom: "1px solid var(--border)",
         background: "var(--bg-secondary)",
         zIndex: 5,
       }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "16px" }}>🎵</span>
-            <h2 style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary)" }}>
-              {roomName || "Listening Room"}
-            </h2>
-          </div>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px" }}>
-            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Code:</span>
-            <code style={{
-              background: "rgba(124, 58, 237, 0.15)",
-              border: "1px solid rgba(124, 58, 237, 0.3)",
-              padding: "2px 8px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              fontWeight: "700",
-              letterSpacing: "0.05em",
-              color: "#A78BFA",
-            }}>
-              {inviteCode || "—"}
-            </code>
-            {inviteCode && (
-              <>
-                <button
-                  onClick={handleCopyCode}
-                  className="btn btn-ghost btn-sm"
-                  style={{ padding: "2px 8px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
-                  title="Copy Invite Code"
-                >
-                  {copiedCode ? "✓ Copied" : "Copy"}
-                </button>
-                <button
-                  onClick={handleCopyLink}
-                  className="btn btn-secondary btn-sm"
-                  style={{ padding: "2px 10px", height: "auto", fontSize: "11px", borderRadius: "14px", fontWeight: 600 }}
-                  title="Copy Direct Join Link"
-                >
-                  {copiedLink ? "✓ Link Copied!" : "🔗 Share Link"}
-                </button>
-              </>
-            )}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <Image
+            src="/assets/app-logo-trans.png"
+            alt="TuneTogether Logo"
+            width={34}
+            height={34}
+            style={{ objectFit: "contain" }}
+          />
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+                {roomName || "Listening Room"}
+              </h2>
+            </div>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "2px" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Code:</span>
+              <code style={{
+                background: "rgba(139, 92, 246, 0.15)",
+                border: "1px solid rgba(139, 92, 246, 0.3)",
+                padding: "2px 8px",
+                borderRadius: "4px",
+                fontSize: "12px",
+                fontWeight: "700",
+                letterSpacing: "0.06em",
+                color: "#C4B5FD",
+                fontFamily: "monospace",
+              }}>
+                {inviteCode || "—"}
+              </code>
+              {inviteCode && (
+                <>
+                  <button
+                    onClick={handleCopyCode}
+                    className="btn btn-ghost btn-sm"
+                    style={{ padding: "2px 8px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
+                    title="Copy Invite Code"
+                  >
+                    {copiedCode ? "✓ Copied" : "Copy"}
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "2px 10px", height: "auto", fontSize: "11px", borderRadius: "14px", fontWeight: 600 }}
+                    title="Copy Direct Join Link"
+                  >
+                    {copiedLink ? "✓ Link Copied!" : "🔗 Share Link"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

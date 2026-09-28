@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 
 export default function HomePage() {
@@ -12,13 +14,13 @@ export default function HomePage() {
   useEffect(() => {
     setMounted(true);
     if (!isAuthenticated()) {
-      router.push("/");
+      router.push("/login");
     }
   }, [isAuthenticated, router]);
 
   const handleLogout = () => {
     clearAuth();
-    router.push("/");
+    router.push("/login");
   };
 
   if (!mounted || !isAuthenticated()) return null;
@@ -28,28 +30,66 @@ export default function HomePage() {
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      background: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.08) 0%, #0F0F0F 80%)",
+      background: "#08080C",
+      position: "relative",
     }}>
+      {/* Ambient background glow */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "600px",
+        height: "350px",
+        background: "radial-gradient(ellipse, rgba(139, 92, 246, 0.14) 0%, transparent 70%)",
+        filter: "blur(80px)",
+        pointerEvents: "none",
+      }} />
+
       {/* Header */}
       <header style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "20px 40px",
-        borderBottom: "1px solid var(--border)",
-        background: "rgba(15, 15, 15, 0.6)",
-        backdropFilter: "blur(12px)",
+        padding: "18px 40px",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
+        background: "rgba(10, 10, 14, 0.75)",
+        backdropFilter: "blur(16px)",
+        position: "relative",
+        zIndex: 10,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "24px" }}>🎵</span>
-          <span style={{ fontSize: "20px", fontWeight: "800", letterSpacing: "-0.02em" }}>TuneTogether</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Logged in as <strong style={{ color: "var(--text-primary)" }}>{username}</strong>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+          <Image
+            src="/assets/app-logo-trans.png"
+            alt="TuneTogether Logo"
+            width={38}
+            height={38}
+            priority
+            style={{ objectFit: "contain", filter: "drop-shadow(0 4px 12px rgba(139,92,246,0.4))" }}
+          />
+          <span style={{ fontSize: "19px", fontWeight: "800", letterSpacing: "-0.02em", color: "#FFFFFF" }}>
+            TuneTogether
           </span>
-          <button onClick={handleLogout} className="btn btn-ghost btn-sm">
-            Logout
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "rgba(255, 255, 255, 0.05)",
+            padding: "6px 14px",
+            borderRadius: "99px",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+          }}>
+            <span className="online-dot" />
+            <span style={{ color: "var(--text-secondary)", fontSize: "13px" }}>
+              Logged in as <strong style={{ color: "#F8FAFC" }}>{username}</strong>
+            </span>
+          </div>
+
+          <button onClick={handleLogout} className="btn btn-ghost btn-sm" id="home-logout">
+            Log out
           </button>
         </div>
       </header>
@@ -60,37 +100,101 @@ export default function HomePage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "40px",
+        padding: "40px 24px",
+        position: "relative",
+        zIndex: 2,
       }}>
-        <div className="fade-in" style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <h1 style={{ fontSize: "36px", fontWeight: "800", marginBottom: "8px", letterSpacing: "-0.03em" }}>
-              Welcome back
+        <div className="fade-in" style={{ width: "100%", maxWidth: "520px", display: "flex", flexDirection: "column", gap: "28px" }}>
+          <div style={{ textAlign: "center" }}>
+            <h1 style={{ fontSize: "34px", fontWeight: "800", marginBottom: "8px", letterSpacing: "-0.02em" }}>
+              Welcome to the Hub
             </h1>
-            <p style={{ color: "var(--text-secondary)", fontSize: "16px" }}>
-              Create a new room or join an existing one to start listening.
+            <p style={{ color: "var(--text-secondary)", fontSize: "15px", lineHeight: "1.5" }}>
+              Create a fresh listening sanctuary or enter your friend&apos;s active room.
             </p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
+            {/* Create Room Button */}
             <button
               onClick={() => router.push("/room/create")}
-              className="btn btn-primary"
-              style={{ padding: "20px", fontSize: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "4px" }}
+              className="card card-glow"
+              style={{
+                padding: "24px 28px",
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                textAlign: "left",
+                cursor: "pointer",
+                border: "1px solid rgba(139, 92, 246, 0.3)",
+                background: "radial-gradient(circle at 10% 50%, rgba(139, 92, 246, 0.15) 0%, rgba(21, 22, 34, 0.8) 100%)",
+              }}
               id="home-create-room"
             >
-              <span style={{ fontSize: "20px" }}>➕ Create Room</span>
-              <span style={{ fontSize: "13px", fontWeight: "normal", opacity: 0.8 }}>Start a new session as the host</span>
+              <div style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "16px",
+                background: "var(--accent-gradient)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "24px",
+                flexShrink: 0,
+                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.4)",
+              }}>
+                ➕
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#FFFFFF", marginBottom: "3px" }}>
+                  Create Room
+                </h3>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                  Host a new synchronized session. You control the queue.
+                </p>
+              </div>
+              <span style={{ fontSize: "20px", color: "#A78BFA" }}>→</span>
             </button>
 
+            {/* Join Room Button */}
             <button
               onClick={() => router.push("/room/join")}
-              className="btn btn-secondary"
-              style={{ padding: "20px", fontSize: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "4px" }}
+              className="card card-glow"
+              style={{
+                padding: "24px 28px",
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                textAlign: "left",
+                cursor: "pointer",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "rgba(21, 22, 34, 0.75)",
+              }}
               id="home-join-room"
             >
-              <span style={{ fontSize: "20px" }}>🚪 Join Room</span>
-              <span style={{ fontSize: "13px", fontWeight: "normal", opacity: 0.8 }}>Enter an invite code from a friend</span>
+              <div style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "16px",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "24px",
+                flexShrink: 0,
+              }}>
+                🚪
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#FFFFFF", marginBottom: "3px" }}>
+                  Join Room
+                </h3>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                  Enter a 5-letter invite code or drop in with an invite link.
+                </p>
+              </div>
+              <span style={{ fontSize: "20px", color: "var(--text-secondary)" }}>→</span>
             </button>
           </div>
         </div>

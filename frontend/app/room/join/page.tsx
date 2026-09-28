@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { useRoomStore } from "@/store/roomStore";
 import api from "@/lib/api";
@@ -11,38 +13,41 @@ function JoinRoomContent() {
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuthStore();
   const { setRoom } = useRoomStore();
-  const [inviteCode, setInviteCode] = useState("");
+
+  const codeParam = (searchParams.get("code") || "").trim().toUpperCase();
+  const [inviteCode, setInviteCode] = useState(codeParam);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  // To handle if password is required after first attempt
+  const [autoJoining, setAutoJoining] = useState(!!codeParam);
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const codeParam = searchParams.get("code");
+    const targetUrl = codeParam ? `/room/join?code=${codeParam}` : "/room/join";
+
     if (!isAuthenticated()) {
-      const target = codeParam ? `/room/join?code=${codeParam.trim().toUpperCase()}` : "/room/join";
-      router.push(`/?redirect=${encodeURIComponent(target)}`);
+      router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
       return;
     }
+
     if (codeParam) {
-      setInviteCode(codeParam.trim().toUpperCase());
+      setInviteCode(codeParam);
+      // Auto join if code was provided in URL
+      executeJoin(codeParam, "");
     }
   }, [isAuthenticated, router, searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeJoin = async (codeToJoin: string, pwd?: string) => {
     setError("");
     setLoading(true);
     try {
       const res = await api.post("/rooms/join", {
-        invite_code: inviteCode.trim().toUpperCase(),
-        password: password || null,
+        invite_code: codeToJoin.trim().toUpperCase(),
+        password: pwd || password || null,
       });
-      // Store room details in zustand
+
       setRoom({
         roomId: res.data.room_id,
         roomName: res.data.room_name,
@@ -51,34 +56,42 @@ function JoinRoomContent() {
         members: res.data.members || [],
         currentSong: res.data.current_song || {},
       });
-      // Navigate to the room page
+
       router.push(`/room?id=${res.data.room_id}`);
     } catch (err: any) {
-      console.error("Join room failed:", err, err?.response?.data || err?.message);
+      setAutoJoining(false);
+      const statusCode = err?.response?.status;
       const detail = err?.response?.data?.detail;
-      if (err?.response?.status === 401 || detail === "Not authenticated") {
-        setError("Session expired or not authenticated. Please log in again.");
-      } else if (err?.response?.status === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
+
+      if (statusCode === 401 || detail === "Not authenticated") {
+        const dest = codeToJoin ? `/room/join?code=${codeToJoin}` : "/room/join";
+        router.push(`/login?redirect=${encodeURIComponent(dest)}`);
+      } else if (statusCode === 403 || (typeof detail === "string" && detail.toLowerCase().includes("password"))) {
         setPasswordRequired(true);
-        setError("Password is required or incorrect for this room.");
-      } else if (err?.response?.status === 404) {
+        setError("This room requires a password to enter.");
+      } else if (statusCode === 404) {
         setError("Room not found. Please check the 5-character invite code.");
-      } else if (err?.response?.status === 409) {
-        setError("Room is currently full.");
+      } else if (statusCode === 409) {
+        setError("This room has reached maximum capacity.");
       } else {
-        let msg = "Failed to join room. Please check the code.";
-        if (typeof detail === "string") {
-          msg = detail;
-        } else if (Array.isArray(detail) && detail.length > 0) {
-          msg = detail[0]?.msg || msg;
-        } else if (err?.message && !err?.response) {
-          msg = `Network or CORS error (${err.message}). Verify backend is reachable.`;
-        }
-        setError(msg);
+        setError(
+          typeof detail === "string"
+            ? detail
+            : err?.message || "Failed to join room. Verify backend is running."
+        );
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteCode.trim()) {
+      setError("Please enter a valid invite code.");
+      return;
+    }
+    executeJoin(inviteCode, password);
   };
 
   if (!mounted || !isAuthenticated()) return null;
@@ -89,72 +102,122 @@ function JoinRoomContent() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.1) 0%, #0F0F0F 85%)",
+      background: "radial-gradient(circle at 50% 15%, rgba(139, 92, 246, 0.14) 0%, #08080C 80%)",
       padding: "24px",
+      position: "relative",
     }}>
-      <div className="fade-in" style={{ width: "100%", maxWidth: "440px" }}>
+      <div className="fade-in" style={{ width: "100%", maxWidth: "440px", position: "relative", zIndex: 2 }}>
         
         {/* Navigation back */}
-        <button
-          onClick={() => router.push("/home")}
+        <Link
+          href="/home"
           className="btn btn-ghost btn-sm"
-          style={{ marginBottom: "16px", paddingLeft: 0 }}
+          style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
         >
-          ← Back to Home
-        </button>
+          <span>←</span> Back to Dashboard
+        </Link>
 
-        <div className="card" style={{ padding: "32px" }}>
-          <h2 style={{ fontSize: "22px", fontWeight: "800", marginBottom: "8px" }}>
-            Join a Room
-          </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px" }}>
-            Enter the 5-character invite code below.
-          </p>
-
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <div>
-              <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                Invite Code
-              </label>
-              <input
-                className="input"
-                type="text"
-                placeholder="e.g., K4L9P"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-                maxLength={5}
-                required
-                style={{ textTransform: "uppercase", fontSize: "18px", letterSpacing: "0.1em", fontWeight: "700", textAlign: "center" }}
-                id="join-room-invite-code"
-              />
+        <div className="card card-glow" style={{ padding: "34px 28px" }}>
+          {autoJoining && loading ? (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{
+                width: "44px",
+                height: "44px",
+                border: "3px solid rgba(139, 92, 246, 0.2)",
+                borderTopColor: "var(--accent)",
+                borderRadius: "50%",
+                margin: "0 auto 18px",
+                animation: "spin 0.8s linear infinite",
+              }} />
+              <style>{`
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
+                }
+              `}</style>
+              <h2 style={{ fontSize: "19px", fontWeight: "700", marginBottom: "6px" }}>
+                Entering Room {codeParam}…
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+                Verifying your invitation and synchronizing audio.
+              </p>
             </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                <Image
+                  src="/assets/app-logo-trans.png"
+                  alt="TuneTogether Logo"
+                  width={38}
+                  height={38}
+                  style={{ objectFit: "contain" }}
+                />
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "800", letterSpacing: "-0.01em" }}>
+                    Join a Room
+                  </h2>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "13px" }}>
+                    Enter the 5-character room code.
+                  </p>
+                </div>
+              </div>
 
-            <div>
-              <label className="label" style={{ display: "block", marginBottom: "8px" }}>
-                Room Password <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: "normal" }}>(Optional)</span>
-              </label>
-              <input
-                className="input"
-                type="password"
-                placeholder="Enter password if room is protected"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                id="join-room-password"
-              />
-            </div>
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                <div>
+                  <label className="label" style={{ display: "block", marginBottom: "8px" }}>
+                    Invite Code
+                  </label>
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="e.g. K4L9P"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    maxLength={5}
+                    required
+                    style={{
+                      textTransform: "uppercase",
+                      fontSize: "20px",
+                      letterSpacing: "0.15em",
+                      fontWeight: "700",
+                      textAlign: "center",
+                      fontFamily: "monospace",
+                    }}
+                    id="join-room-invite-code"
+                  />
+                </div>
 
-            {error && <p className="error-text">{error}</p>}
+                {(passwordRequired || password) && (
+                  <div>
+                    <label className="label" style={{ display: "block", marginBottom: "8px" }}>
+                      Room Password
+                    </label>
+                    <input
+                      className="input"
+                      type="password"
+                      placeholder="Enter room password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={passwordRequired}
+                      id="join-room-password"
+                      autoFocus={passwordRequired}
+                    />
+                  </div>
+                )}
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-              id="join-room-submit"
-              style={{ width: "100%", marginTop: "8px", padding: "14px" }}
-            >
-              {loading ? "Joining Room…" : "Join Room"}
-            </button>
-          </form>
+                {error && <p className="error-text">{error}</p>}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                  id="join-room-submit"
+                  style={{ width: "100%", marginTop: "6px", padding: "14px" }}
+                >
+                  {loading ? "Joining…" : "Join Room"}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -163,9 +226,8 @@ function JoinRoomContent() {
 
 export default function JoinRoomPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0F0F0F" }} />}>
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#08080C" }} />}>
       <JoinRoomContent />
     </Suspense>
   );
 }
-

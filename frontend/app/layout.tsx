@@ -2,8 +2,19 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TuneTogether — Listen Together",
-  description: "Real-time synchronized music listening with friends. Join a room, talk over voice, and feel the same beat at the exact same moment.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  title: "TuneTogether — Listen & Watch Together in Real Time",
+  description: "Real-time synchronized music, videos, and live voice chat with friends. Zero lag, shared queues, and unforgettable listening parties.",
+  icons: {
+    icon: "/assets/app-logo.jpg",
+    shortcut: "/assets/app-logo.jpg",
+    apple: "/assets/app-logo.jpg",
+  },
+  openGraph: {
+    title: "TuneTogether — Listen & Watch Together",
+    description: "Real-time synchronized music, videos, and live voice chat with friends.",
+    images: [{ url: "/assets/app-logo.jpg", width: 1200, height: 1200, alt: "TuneTogether" }],
+  },
 };
 
 export default function RootLayout({
