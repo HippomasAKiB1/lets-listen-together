@@ -191,40 +191,33 @@ import urllib.parse
 # Curated fallback track list to ensure testing is ALWAYS working even without YouTube API keys
 FALLBACK_MOCKS = [
     {
-        "video_id": "kJQP7kiw5Fk",
-        "song_title": "Despacito",
-        "artist": "Luis Fonsi ft. Daddy Yankee",
-        "thumbnail_url": "https://img.youtube.com/vi/kJQP7kiw5Fk/0.jpg",
-        "duration_seconds": 282,
+        "video_id": "E58qLXBfLrs",
+        "song_title": "Can't Tell Me Nothing",
+        "artist": "Kanye West",
+        "thumbnail_url": "https://img.youtube.com/vi/E58qLXBfLrs/0.jpg",
+        "duration_seconds": 272,
     },
     {
-        "video_id": "JGwWNGJdvx8",
-        "song_title": "Shape of You",
-        "artist": "Ed Sheeran",
-        "thumbnail_url": "https://img.youtube.com/vi/JGwWNGJdvx8/0.jpg",
-        "duration_seconds": 263,
+        "video_id": "weU76DGHKU0",
+        "song_title": "What Did I Miss",
+        "artist": "Drake",
+        "thumbnail_url": "https://img.youtube.com/vi/weU76DGHKU0/0.jpg",
+        "duration_seconds": 185,
     },
     {
-        "video_id": "9bZkp7q19f0",
-        "song_title": "PSY - GANGNAM STYLE",
-        "artist": "PSY",
-        "thumbnail_url": "https://img.youtube.com/vi/9bZkp7q19f0/0.jpg",
-        "duration_seconds": 252,
+        "video_id": "REmZhFKmOmo",
+        "song_title": "wokeuplikethis*",
+        "artist": "Playboi Carti ft. Lil Uzi Vert",
+        "thumbnail_url": "https://img.youtube.com/vi/REmZhFKmOmo/0.jpg",
+        "duration_seconds": 235,
     },
     {
-        "video_id": "OPf0YbXqDm0",
-        "song_title": "Mark Ronson - Uptown Funk ft. Bruno Mars",
-        "artist": "Mark Ronson",
-        "thumbnail_url": "https://img.youtube.com/vi/OPf0YbXqDm0/0.jpg",
-        "duration_seconds": 270,
+        "video_id": "b8I-7Wk_Vbc",
+        "song_title": "Bailando",
+        "artist": "Enrique Iglesias ft. Descemer Bueno, Gente De Zona",
+        "thumbnail_url": "https://img.youtube.com/vi/b8I-7Wk_Vbc/0.jpg",
+        "duration_seconds": 243,
     },
-    {
-        "video_id": "LSOF_vSOeQ0",
-        "song_title": "Coldplay - Yellow",
-        "artist": "Coldplay",
-        "thumbnail_url": "https://img.youtube.com/vi/LSOF_vSOeQ0/0.jpg",
-        "duration_seconds": 268,
-    }
 ]
 
 
