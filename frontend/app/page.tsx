@@ -261,8 +261,38 @@ export default function LandingPage() {
         letterSpacing: "0.04em",
         flexShrink: 0,
       }}>
-        <span>TUNETOGETHER · SYNCHRONIZED AUDIO & VIDEO ROOMS</span>
-        <span>© 2026 ALL RIGHTS RESERVED</span>
+        <span>TUNE TOGETHER · SYNCHRONIZED AUDIO & VIDEO</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span>
+            CRAFTED BY{" "}
+            <a
+              href="https://akibhasan.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "var(--ink)",
+                textDecoration: "none",
+                fontWeight: 900,
+                borderBottom: "2px solid var(--ink)",
+                paddingBottom: "1px",
+                transition: "all 100ms ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--ink)";
+                e.currentTarget.style.color = "var(--accent-alt)";
+                e.currentTarget.style.padding = "2px 6px";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "var(--ink)";
+                e.currentTarget.style.padding = "0";
+              }}
+            >
+              AKIB HASAN PYIL ↗
+            </a>
+          </span>
+          <span>© 2026</span>
+        </div>
       </footer>
     </div>
   );
