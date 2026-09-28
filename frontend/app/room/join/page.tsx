@@ -36,7 +36,14 @@ export default function JoinRoomPage() {
         password: password || null,
       });
       // Store room details in zustand
-      setRoom(res.data);
+      setRoom({
+        roomId: res.data.room_id,
+        roomName: res.data.room_name,
+        hostId: res.data.host_id,
+        inviteCode: res.data.invite_code,
+        members: res.data.members || [],
+        currentSong: res.data.current_song || {},
+      });
       // Navigate to the room page
       router.push(`/room?id=${res.data.room_id}`);
     } catch (err: any) {

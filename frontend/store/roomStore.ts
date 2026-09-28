@@ -38,12 +38,18 @@ interface RoomState {
   isScreenSharing: boolean;
 
   setRoom: (data: {
-    roomId: string;
-    roomName: string;
-    hostId: string;
-    inviteCode: string;
-    members: Member[];
-    currentSong: Partial<CurrentSong>;
+    roomId?: string | null;
+    room_id?: string | null;
+    roomName?: string | null;
+    room_name?: string | null;
+    hostId?: string | null;
+    host_id?: string | null;
+    inviteCode?: string | null;
+    invite_code?: string | null;
+    members?: Member[];
+    currentSong?: Partial<CurrentSong>;
+    current_song?: Partial<CurrentSong>;
+    mode?: "youtube" | "screenshare";
   }) => void;
 
   setMembers: (members: Member[]) => void;
@@ -79,16 +85,19 @@ export const useRoomStore = create<RoomState>((set) => ({
   mode: "youtube",
   isScreenSharing: false,
 
-  setRoom: ({ roomId, roomName, hostId, inviteCode, members, currentSong }) =>
+  setRoom: (data) => {
+    const rawSong = data.currentSong || data.current_song || {};
+    const resolvedMode = (rawSong?.mode || data.mode || "youtube") as "youtube" | "screenshare";
     set({
-      roomId,
-      roomName,
-      hostId,
-      inviteCode,
-      members,
-      currentSong: { ...DEFAULT_SONG, ...currentSong } as CurrentSong,
-      mode: (currentSong.mode as "youtube" | "screenshare") || "youtube",
-    }),
+      roomId: data.roomId || data.room_id || null,
+      roomName: data.roomName || data.room_name || null,
+      hostId: data.hostId || data.host_id || null,
+      inviteCode: data.inviteCode || data.invite_code || null,
+      members: data.members || [],
+      currentSong: { ...DEFAULT_SONG, ...rawSong } as CurrentSong,
+      mode: resolvedMode,
+    });
+  },
 
   setMembers: (members) => set({ members }),
 
