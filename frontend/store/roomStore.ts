@@ -4,7 +4,23 @@ export interface Member {
   user_id: string;
   username: string;
   is_speaking?: boolean;
+  is_muted?: boolean;
   sid?: string;
+}
+
+export interface QueueItem {
+  video_id: string;
+  song_title: string;
+  artist: string;
+  thumbnail_url: string;
+  duration_seconds: number;
+  added_by?: string;
+}
+
+export interface FloatingReaction {
+  id: string;
+  emoji: string;
+  username: string;
 }
 
 export interface CurrentSong {
@@ -34,6 +50,8 @@ interface RoomState {
   members: Member[];
   currentSong: CurrentSong;
   messages: ChatMessage[];
+  queue: QueueItem[];
+  reactions: FloatingReaction[];
   mode: "youtube" | "screenshare";
   isScreenSharing: boolean;
 
@@ -47,6 +65,7 @@ interface RoomState {
     inviteCode?: string | null;
     invite_code?: string | null;
     members?: Member[];
+    queue?: QueueItem[];
     currentSong?: Partial<CurrentSong>;
     current_song?: Partial<CurrentSong>;
     mode?: "youtube" | "screenshare";
@@ -54,7 +73,12 @@ interface RoomState {
 
   setMembers: (members: Member[]) => void;
   setMemberSpeaking: (userId: string, isSpeaking: boolean) => void;
+  setMemberMic: (userId: string, isMuted: boolean) => void;
+  setHostId: (hostId: string) => void;
   setCurrentSong: (song: Partial<CurrentSong>) => void;
+  setQueue: (queue: QueueItem[]) => void;
+  addReaction: (reaction: FloatingReaction) => void;
+  removeReaction: (id: string) => void;
   addMessage: (msg: ChatMessage) => void;
   setMessages: (msgs: ChatMessage[]) => void;
   setMode: (mode: "youtube" | "screenshare") => void;
@@ -82,21 +106,24 @@ export const useRoomStore = create<RoomState>((set) => ({
   members: [],
   currentSong: DEFAULT_SONG,
   messages: [],
+  queue: [],
+  reactions: [],
   mode: "youtube",
   isScreenSharing: false,
 
   setRoom: (data) => {
     const rawSong = data.currentSong || data.current_song || {};
     const resolvedMode = (rawSong?.mode || data.mode || "youtube") as "youtube" | "screenshare";
-    set({
-      roomId: data.roomId || data.room_id || null,
-      roomName: data.roomName || data.room_name || null,
-      hostId: data.hostId || data.host_id || null,
-      inviteCode: data.inviteCode || data.invite_code || null,
-      members: data.members || [],
+    set((state) => ({
+      roomId: data.roomId || data.room_id || state.roomId,
+      roomName: data.roomName || data.room_name || state.roomName,
+      hostId: data.hostId || data.host_id || state.hostId,
+      inviteCode: data.inviteCode || data.invite_code || state.inviteCode,
+      members: data.members || state.members,
+      queue: data.queue || state.queue,
       currentSong: { ...DEFAULT_SONG, ...rawSong } as CurrentSong,
       mode: resolvedMode,
-    });
+    }));
   },
 
   setMembers: (members) => set({ members }),
@@ -108,9 +135,30 @@ export const useRoomStore = create<RoomState>((set) => ({
       ),
     })),
 
+  setMemberMic: (userId, isMuted) =>
+    set((state) => ({
+      members: state.members.map((m) =>
+        m.user_id === userId ? { ...m, is_muted: isMuted } : m
+      ),
+    })),
+
+  setHostId: (hostId) => set({ hostId }),
+
   setCurrentSong: (song) =>
     set((state) => ({
       currentSong: { ...state.currentSong, ...song },
+    })),
+
+  setQueue: (queue) => set({ queue }),
+
+  addReaction: (reaction) =>
+    set((state) => ({
+      reactions: [...state.reactions.slice(-15), reaction], // keep at most 15 in memory
+    })),
+
+  removeReaction: (id) =>
+    set((state) => ({
+      reactions: state.reactions.filter((r) => r.id !== id),
     })),
 
   addMessage: (msg) =>
@@ -133,6 +181,8 @@ export const useRoomStore = create<RoomState>((set) => ({
       members: [],
       currentSong: DEFAULT_SONG,
       messages: [],
+      queue: [],
+      reactions: [],
       mode: "youtube",
       isScreenSharing: false,
     }),

@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useRoomStore } from "@/store/roomStore";
 import api from "@/lib/api";
 
-export default function JoinRoomPage() {
+function JoinRoomContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useAuthStore();
   const { setRoom } = useRoomStore();
   const [inviteCode, setInviteCode] = useState("");
@@ -24,7 +25,11 @@ export default function JoinRoomPage() {
     if (!isAuthenticated()) {
       router.push("/");
     }
-  }, [isAuthenticated, router]);
+    const codeParam = searchParams.get("code");
+    if (codeParam) {
+      setInviteCode(codeParam.trim().toUpperCase());
+    }
+  }, [isAuthenticated, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,3 +158,12 @@ export default function JoinRoomPage() {
     </div>
   );
 }
+
+export default function JoinRoomPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0F0F0F" }} />}>
+      <JoinRoomContent />
+    </Suspense>
+  );
+}
+

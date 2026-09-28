@@ -66,6 +66,20 @@ export default function MusicControls() {
     }
   };
 
+  const handleAddToQueue = (e: React.MouseEvent, song: SearchResult) => {
+    e.stopPropagation();
+    const socket = getSocketInstance();
+    if (socket?.connected) {
+      socket.emit("add_to_queue", {
+        video_id: song.video_id,
+        song_title: song.song_title,
+        artist: song.artist,
+        thumbnail_url: song.thumbnail_url,
+        duration_seconds: song.duration_seconds,
+      });
+    }
+  };
+
   if (!isHost) return null;
 
   return (
@@ -138,7 +152,7 @@ export default function MusicControls() {
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
-                  padding: "12px 16px",
+                  padding: "10px 16px",
                   cursor: "pointer",
                   borderBottom: "1px solid var(--border)",
                   background: isCurrentlyPlaying ? "var(--accent-light)" : "transparent",
@@ -174,6 +188,27 @@ export default function MusicControls() {
                   }}>
                     {song.artist}
                   </p>
+                </div>
+
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddToQueue(e, song)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "16px" }}
+                    title="Add to Up Next Queue"
+                  >
+                    ➕ Queue
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSong(song)}
+                    className="btn btn-primary btn-sm"
+                    style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "16px" }}
+                    title="Play Immediately"
+                  >
+                    ▶ Play
+                  </button>
                 </div>
               </div>
             );

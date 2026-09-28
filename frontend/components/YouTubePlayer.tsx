@@ -25,7 +25,18 @@ export default function YouTubePlayer() {
 
   const [playerReady, setPlayerReady] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
-  const [volume, setVolume] = useState(70);
+  const [volume, setVolume] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("tunetogether_volume");
+        if (saved) {
+          const v = Number(saved);
+          if (!isNaN(v) && v >= 0 && v <= 100) return v;
+        }
+      } catch {}
+    }
+    return 70;
+  });
   const [isDucked, setIsDucked] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
@@ -99,6 +110,13 @@ export default function YouTubePlayer() {
           onStateChange: (event: any) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               setAutoplayBlocked(false);
+            }
+            if (event.data === window.YT.PlayerState.ENDED) {
+              if (isHost) {
+                const socket = getSocketInstance();
+                socket?.emit("host_song_ended", { video_id: currentSong.video_id });
+              }
+              return;
             }
             if (isHost && !isSyncingRef.current) {
               const socket = getSocketInstance();
@@ -302,6 +320,9 @@ export default function YouTubePlayer() {
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
     setVolume(val);
+    try {
+      localStorage.setItem("tunetogether_volume", String(val));
+    } catch {}
     if (playerReady && playerRef.current) {
       try {
         playerRef.current.setVolume(isDucked ? Math.round(val * 0.4) : val);
@@ -360,6 +381,34 @@ export default function YouTubePlayer() {
         background: "#000",
       }}>
         <div id="yt-player-iframe" style={{ width: "100%", height: "100%" }}></div>
+
+        {/* Track Ended Clean State Overlay — eliminates YouTube recommended cards */}
+        {!currentSong.is_playing && currentSong.video_id && localProgress > 0 && currentSong.duration_seconds > 0 && localProgress >= (currentSong.duration_seconds - 3) && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(10, 10, 10, 0.94)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "14px",
+            zIndex: 8,
+            backdropFilter: "blur(6px)",
+            padding: "24px",
+            textAlign: "center",
+          }}>
+            <span style={{ fontSize: "40px" }}>🎉</span>
+            <div>
+              <h4 style={{ fontSize: "18px", fontWeight: "700", color: "#fff", margin: "0 0 6px 0" }}>
+                Track Finished
+              </h4>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
+                {isHost ? "Choose a new track from Search or check your Queue" : "Waiting for the host to pick the next track..."}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Guest click shield: Only host can click/pause/scrub the video player */}
         {!isHost && (

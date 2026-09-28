@@ -20,7 +20,10 @@ import YouTubePlayer from "@/components/YouTubePlayer";
 import ScreenShareViewer from "@/components/ScreenShareViewer";
 import MusicControls from "@/components/MusicControls";
 import ModeSelector from "@/components/ModeSelector";
+import QueuePanel from "@/components/QueuePanel";
+import FloatingReactions from "@/components/FloatingReactions";
 import api from "@/lib/api";
+import { useRef } from "react";
 
 function RoomContent() {
   const router = useRouter();
@@ -33,16 +36,26 @@ function RoomContent() {
     inviteCode,
     hostId,
     currentSong,
+    queue,
     setRoom,
     setMembers,
+    setMemberSpeaking,
+    setMemberMic,
+    setHostId,
     setCurrentSong,
+    setQueue,
+    addReaction,
+    removeReaction,
     addMessage,
     clearRoom,
   } = useRoomStore();
 
+  const socketRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [micMuted, setMicMuted] = useState(false);
   const [micError, setMicError] = useState("");
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
   const isHost = userId === hostId;
 
   // 1. Redirect if not authenticated or no roomId
@@ -89,6 +102,7 @@ function RoomContent() {
 
         // B. Connect socket
         socket = getSocket(token, roomId);
+        socketRef.current = socket;
 
         // C. Setup WebSocket event listeners
         socket.on("sync_state", (data: any) => {
@@ -98,6 +112,7 @@ function RoomContent() {
             hostId: data.host_id,
             inviteCode: data.invite_code || data.inviteCode || useRoomStore.getState().inviteCode || "",
             members: data.members || [],
+            queue: data.queue || [],
             currentSong: data.current_song || {},
           });
           setLoading(false);
@@ -129,6 +144,44 @@ function RoomContent() {
             content: `${data.username} left the room.`,
             sent_at: new Date().toISOString(),
           });
+        });
+
+        socket.on("member_mic_changed", (data: any) => {
+          setMemberMic(data.user_id, data.is_muted);
+        });
+
+        socket.on("member_speaking", (data: any) => {
+          setMemberSpeaking(data.user_id, data.is_speaking);
+        });
+
+        socket.on("queue_updated", (data: any) => {
+          setQueue(data.queue || []);
+        });
+
+        socket.on("song_ended", () => {
+          setCurrentSong({ is_playing: false });
+        });
+
+        socket.on("host_transferred", (data: any) => {
+          setHostId(data.new_host_id);
+          addMessage({
+            message_id: Math.random().toString(),
+            username: "System",
+            content: "👑 Room host role has been transferred.",
+            sent_at: new Date().toISOString(),
+          });
+        });
+
+        socket.on("kicked", (data: any) => {
+          alert(data.reason || "You were removed from the room by the host.");
+          cleanupAndLeave();
+        });
+
+        socket.on("reaction_received", (data: any) => {
+          addReaction(data);
+          setTimeout(() => {
+            useRoomStore.getState().removeReaction(data.id);
+          }, 3500);
         });
 
         // WebRTC Signaling Relay
@@ -213,6 +266,26 @@ function RoomContent() {
     const next = !micMuted;
     setMicMuted(next);
     setMuted(next);
+    socketRef.current?.emit("toggle_mic", { is_muted: next });
+  };
+
+  const handleSendReaction = (emoji: string) => {
+    socketRef.current?.emit("send_reaction", { emoji });
+  };
+
+  const handleCopyLink = () => {
+    if (!inviteCode) return;
+    const url = `${window.location.origin}/room/join?code=${inviteCode}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleCopyCode = () => {
+    if (!inviteCode) return;
+    navigator.clipboard.writeText(inviteCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleLeaveRoom = () => {
@@ -287,16 +360,24 @@ function RoomContent() {
               {inviteCode || "—"}
             </code>
             {inviteCode && (
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(inviteCode);
-                }}
-                className="btn btn-ghost btn-sm"
-                style={{ padding: "2px 6px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
-                title="Copy Invite Code"
-              >
-                Copy
-              </button>
+              <>
+                <button
+                  onClick={handleCopyCode}
+                  className="btn btn-ghost btn-sm"
+                  style={{ padding: "2px 8px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
+                  title="Copy Invite Code"
+                >
+                  {copiedCode ? "✓ Copied" : "Copy"}
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="btn btn-secondary btn-sm"
+                  style={{ padding: "2px 10px", height: "auto", fontSize: "11px", borderRadius: "14px", fontWeight: 600 }}
+                  title="Copy Direct Join Link"
+                >
+                  {copiedLink ? "✓ Link Copied!" : "🔗 Share Link"}
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -326,26 +407,30 @@ function RoomContent() {
           {currentSong.mode === "youtube" && <MusicControls />}
 
           {/* Player zone */}
-          <div style={{ flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
             {currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />}
+            <FloatingReactions />
           </div>
 
           {/* Bottom Bar Controls */}
           <footer style={{
-            padding: "16px 24px",
+            padding: "12px 24px",
             borderTop: "1px solid var(--border)",
             background: "var(--bg-secondary)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: "16px",
           }}>
+            {/* Left: Mic toggle & status */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <button
                 onClick={handleMuteToggle}
                 className={`btn ${micMuted ? "btn-danger" : "btn-secondary"} btn-sm`}
                 id="footer-mute"
+                style={{ borderRadius: "20px", padding: "6px 14px", fontSize: "12px" }}
               >
-                {micMuted ? "🎤 Mic Off (Muted)" : "🎤 Mic On"}
+                {micMuted ? "🔇 Mic Muted" : "🎙️ Mic On"}
               </button>
               {micError && (
                 <span style={{ fontSize: "12px", color: "var(--warning)" }}>
@@ -354,8 +439,46 @@ function RoomContent() {
               )}
             </div>
 
-            <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-              TuneTogether Social Audio Sync
+            {/* Center: Live Floating Reaction Emojis Bar */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              padding: "3px 8px",
+              borderRadius: "20px",
+              border: "1px solid var(--border)",
+            }}>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", marginRight: "2px", fontWeight: 600 }}>
+                React:
+              </span>
+              {["🔥", "❤️", "😂", "👏", "🎉"].map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleSendReaction(emoji)}
+                  className="btn btn-ghost btn-sm"
+                  style={{
+                    fontSize: "16px",
+                    padding: "2px 6px",
+                    height: "auto",
+                    borderRadius: "12px",
+                    transition: "transform 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.25)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                  title={`Send ${emoji} reaction`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            {/* Right: Queue button & branding */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <QueuePanel />
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                TuneTogether
+              </span>
             </div>
           </footer>
         </div>

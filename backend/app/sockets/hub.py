@@ -22,8 +22,11 @@ sio = socketio.AsyncServer(
     engineio_logger=False,
 )
 
-# In-memory room state: { room_id: { sid: { user_id, username } } }
+# In-memory room state: { room_id: { sid: { user_id, username, is_muted, is_speaking } } }
 room_sessions: dict[str, dict[str, dict]] = {}
+
+# In-memory queues: { room_id: [ { video_id, song_title, artist, thumbnail_url, duration_seconds, added_by } ] }
+room_queues: dict[str, list[dict]] = {}
 
 # SID → room_id lookup for disconnect cleanup
 sid_to_room: dict[str, str] = {}
@@ -33,13 +36,19 @@ _host_disconnect_tasks: dict[str, asyncio.Task] = {}
 
 
 def _get_members_list(room_id: str) -> list[dict]:
-    """Return current members as a list of dicts."""
+    """Return current members as a deduplicated list with mic/speaking states."""
     if room_id not in room_sessions:
         return []
-    return [
-        {"user_id": info["user_id"], "username": info["username"]}
-        for info in room_sessions[room_id].values()
-    ]
+    seen = {}
+    for sid, info in room_sessions[room_id].items():
+        uid = info["user_id"]
+        seen[uid] = {
+            "user_id": uid,
+            "username": info["username"],
+            "is_muted": info.get("is_muted", True),
+            "is_speaking": info.get("is_speaking", False),
+        }
+    return list(seen.values())
 
 
 # ─────────────────────────────────────────────
@@ -82,6 +91,8 @@ async def connect(sid, environ, auth):
     room_sessions[room_id][sid] = {
         "user_id": user["user_id"],
         "username": user["username"],
+        "is_muted": True,
+        "is_speaking": False,
     }
     sid_to_room[sid] = room_id
 
@@ -114,6 +125,7 @@ async def connect(sid, environ, auth):
             "max_members": room.max_members if room else 8,
             "host_id": room.host_id if room else None,
             "members": _get_members_list(room_id),
+            "queue": room_queues.get(room_id, []),
             "current_song": {
                 "video_id": song.video_id if song else None,
                 "song_title": song.song_title if song else None,
@@ -493,3 +505,243 @@ async def end_room(sid, data):
 
     await sio.emit("room_ended", {"reason": "Host ended the room"}, room=room_id)
     room_sessions.pop(room_id, None)
+    room_queues.pop(room_id, None)
+
+
+# ─────────────────────────────────────────────
+# Song End & Queue Autoplay
+# ─────────────────────────────────────────────
+
+@sio.on("host_song_ended")
+async def host_song_ended(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+
+    # Check if there is an up next song in the queue
+    queue = room_queues.get(room_id, [])
+    if queue:
+        next_song = queue.pop(0)
+        server_ts = int(time.time() * 1000)
+        async with AsyncSessionLocal() as db:
+            song_result = await db.execute(
+                select(CurrentSong).where(CurrentSong.room_id == room_id)
+            )
+            song = song_result.scalar_one_or_none()
+            if song:
+                song.video_id = next_song.get("video_id")
+                song.song_title = next_song.get("song_title")
+                song.artist = next_song.get("artist")
+                song.thumbnail_url = next_song.get("thumbnail_url")
+                song.duration_seconds = next_song.get("duration_seconds", 0)
+                song.position_ms = 0
+                song.is_playing = True
+                song.server_timestamp = server_ts
+                song.mode = "youtube"
+                db.add(song)
+                await db.commit()
+
+        await sio.emit("queue_updated", {"queue": queue}, room=room_id)
+        await sio.emit(
+            "play",
+            {
+                "event": "play",
+                "video_id": next_song.get("video_id"),
+                "song_title": next_song.get("song_title"),
+                "artist": next_song.get("artist"),
+                "thumbnail_url": next_song.get("thumbnail_url"),
+                "duration_seconds": next_song.get("duration_seconds", 0),
+                "position_ms": 0,
+                "server_timestamp": server_ts,
+            },
+            room=room_id,
+        )
+        return
+
+    # No queue, mark finished
+    async with AsyncSessionLocal() as db:
+        song_result = await db.execute(
+            select(CurrentSong).where(CurrentSong.room_id == room_id)
+        )
+        song = song_result.scalar_one_or_none()
+        if song:
+            song.is_playing = False
+            song.position_ms = (song.duration_seconds or 0) * 1000
+            db.add(song)
+            await db.commit()
+
+    await sio.emit("song_ended", {"video_id": data.get("video_id")}, room=room_id)
+
+
+# ─────────────────────────────────────────────
+# Mic & Voice Activity Status
+# ─────────────────────────────────────────────
+
+@sio.on("toggle_mic")
+async def toggle_mic(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or room_id not in room_sessions:
+        return
+    user_info = room_sessions[room_id].get(sid)
+    if not user_info:
+        return
+    is_muted = bool(data.get("is_muted", True))
+    user_info["is_muted"] = is_muted
+    await sio.emit(
+        "member_mic_changed",
+        {"user_id": user_info["user_id"], "is_muted": is_muted},
+        room=room_id,
+    )
+
+
+@sio.on("speaking_status")
+async def speaking_status(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or room_id not in room_sessions:
+        return
+    user_info = room_sessions[room_id].get(sid)
+    if not user_info:
+        return
+    is_speaking = bool(data.get("is_speaking", False))
+    user_info["is_speaking"] = is_speaking
+    await sio.emit(
+        "member_speaking",
+        {"user_id": user_info["user_id"], "is_speaking": is_speaking},
+        room=room_id,
+    )
+
+
+# ─────────────────────────────────────────────
+# Queue / Up Next Playlist
+# ─────────────────────────────────────────────
+
+@sio.on("add_to_queue")
+async def add_to_queue(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id:
+        return
+    if room_id not in room_queues:
+        room_queues[room_id] = []
+
+    song = {
+        "video_id": data.get("video_id"),
+        "song_title": data.get("song_title"),
+        "artist": data.get("artist"),
+        "thumbnail_url": data.get("thumbnail_url"),
+        "duration_seconds": data.get("duration_seconds", 0),
+        "added_by": room_sessions.get(room_id, {}).get(sid, {}).get("username", "Member"),
+    }
+    room_queues[room_id].append(song)
+    await sio.emit("queue_updated", {"queue": room_queues[room_id]}, room=room_id)
+
+
+@sio.on("remove_from_queue")
+async def remove_from_queue(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+    idx = data.get("index")
+    queue = room_queues.get(room_id, [])
+    if isinstance(idx, int) and 0 <= idx < len(queue):
+        queue.pop(idx)
+        await sio.emit("queue_updated", {"queue": queue}, room=room_id)
+
+
+@sio.on("clear_queue")
+async def clear_queue(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+    room_queues[room_id] = []
+    await sio.emit("queue_updated", {"queue": []}, room=room_id)
+
+
+# ─────────────────────────────────────────────
+# Moderation: Transfer Host & Kick Member
+# ─────────────────────────────────────────────
+
+@sio.on("transfer_host")
+async def transfer_host(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+    new_host_id = data.get("new_host_id")
+    if not new_host_id:
+        return
+
+    async with AsyncSessionLocal() as db:
+        room_result = await db.execute(select(Room).where(Room.room_id == room_id))
+        room = room_result.scalar_one_or_none()
+        if room:
+            room.host_id = new_host_id
+            db.add(room)
+            await db.commit()
+
+    await sio.emit("host_transferred", {"new_host_id": new_host_id}, room=room_id)
+
+
+@sio.on("kick_member")
+async def kick_member(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+    target_user_id = data.get("user_id")
+    if not target_user_id:
+        return
+
+    # Find target SID
+    target_sids = [
+        s for s, info in room_sessions.get(room_id, {}).items()
+        if info["user_id"] == target_user_id
+    ]
+
+    async with AsyncSessionLocal() as db:
+        await db.execute(
+            delete(RoomMember).where(
+                RoomMember.room_id == room_id,
+                RoomMember.user_id == target_user_id,
+            )
+        )
+        await db.commit()
+
+    for tsid in target_sids:
+        await sio.emit("kicked", {"reason": "You were removed from the room by the host."}, to=tsid)
+        room_sessions[room_id].pop(tsid, None)
+        sid_to_room.pop(tsid, None)
+        try:
+            await sio.disconnect(tsid)
+        except Exception:
+            pass
+
+    await sio.emit(
+        "member_left",
+        {
+            "user_id": target_user_id,
+            "username": "A member",
+            "members": _get_members_list(room_id),
+        },
+        room=room_id,
+    )
+
+
+# ─────────────────────────────────────────────
+# Real-Time Floating Reactions (Emoji Bar)
+# ─────────────────────────────────────────────
+
+@sio.on("send_reaction")
+async def send_reaction(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id:
+        return
+    user_info = room_sessions.get(room_id, {}).get(sid, {})
+    emoji = data.get("emoji", "❤️")
+    await sio.emit(
+        "reaction_received",
+        {
+            "id": f"{sid}-{time.time()}",
+            "emoji": emoji,
+            "username": user_info.get("username", "Member"),
+        },
+        room=room_id,
+    )
+
