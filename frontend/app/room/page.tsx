@@ -360,10 +360,11 @@ function RoomContent() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <Image
             src="/assets/app-logo-trans.png"
-            alt="TuneTogether"
+            alt="Tune Together"
             width={120}
             height={44}
             priority
+            className="logo-glow-dark"
             style={{ height: "44px", width: "auto", objectFit: "contain" }}
           />
           <div>

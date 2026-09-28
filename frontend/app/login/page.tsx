@@ -52,13 +52,11 @@ function LoginContent() {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--ink)",
-            padding: "16px 32px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
-              alt="TuneTogether"
+              alt="Tune Together"
               width={200}
               height={80}
               priority
@@ -66,7 +64,7 @@ function LoginContent() {
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
-            TUNETOGETHER
+            TUNE TOGETHER
           </h1>
           <p style={{
             fontSize: "12px",

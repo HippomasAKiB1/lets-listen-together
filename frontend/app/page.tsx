@@ -52,10 +52,11 @@ export default function LandingPage() {
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
           <Image
             src="/assets/app-logo-trans.png"
-            alt="TuneTogether"
+            alt="Tune Together"
             width={120}
             height={44}
             priority
+            className="logo-glow-dark"
             style={{ height: "44px", width: "auto", objectFit: "contain" }}
           />
           <span style={{
@@ -65,7 +66,7 @@ export default function LandingPage() {
             letterSpacing: "0.02em",
             color: "#FFFFFF",
           }}>
-            TUNETOGETHER
+            TUNE TOGETHER
           </span>
         </Link>
 
@@ -128,18 +129,11 @@ export default function LandingPage() {
               <span style={{ color: "var(--accent)" }}>LIVE STREAMING</span>
             </div>
 
-            {/* Prominent Hero Logo on solid contrasting ink background */}
-            <div style={{
-              background: "var(--ink)",
-              padding: "12px 24px",
-              display: "inline-flex",
-              alignItems: "center",
-              marginBottom: "18px",
-              border: "var(--border)",
-            }}>
+            {/* Transparent Hero Logo */}
+            <div style={{ marginBottom: "18px" }}>
               <Image
                 src="/assets/app-logo-trans.png"
-                alt="TuneTogether"
+                alt="Tune Together"
                 width={260}
                 height={96}
                 priority

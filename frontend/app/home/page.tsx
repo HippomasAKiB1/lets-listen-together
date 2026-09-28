@@ -34,7 +34,7 @@ export default function HomePage() {
     }}>
       {/* ── TOP HEADER ── */}
       <header style={{
-        height: "56px",
+        height: "64px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -43,23 +43,24 @@ export default function HomePage() {
         color: "var(--ink-light)",
         borderBottom: "var(--border)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <Image
             src="/assets/app-logo-trans.png"
-            alt="TuneTogether"
-            width={120}
-            height={44}
+            alt="Tune Together"
+            width={140}
+            height={50}
             priority
-            style={{ height: "44px", width: "auto", objectFit: "contain" }}
+            className="logo-glow-dark"
+            style={{ height: "50px", width: "auto", objectFit: "contain" }}
           />
           <span style={{
             fontFamily: "var(--font-display)",
-            fontSize: "18px",
+            fontSize: "22px",
             fontWeight: "900",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.03em",
             color: "#FFFFFF",
           }}>
-            TUNETOGETHER
+            TUNE TOGETHER
           </span>
         </div>
 
@@ -84,12 +85,6 @@ export default function HomePage() {
           </button>
         </div>
       </header>
-
-      {/* ── HORIZONTAL SUB-BAR ── */}
-      <div className="section-bar">
-        <span>ROOM SELECTION</span>
-        <span>CHOOSE AN ACTION</span>
-      </div>
 
       {/* ── MAIN CONTENT GRID ── */}
       <main style={{
@@ -135,6 +130,7 @@ export default function HomePage() {
           {/* TILE 1: CREATE ROOM (SOLID ACCENT BLOCK) */}
           <div
             onClick={() => router.push("/room/create")}
+            className="home-action-card"
             style={{
               background: "var(--accent)",
               color: "#FFFFFF",
@@ -146,7 +142,6 @@ export default function HomePage() {
               flexDirection: "column",
               justifyContent: "space-between",
               minHeight: "220px",
-              transition: "transform 80ms ease-out, box-shadow 80ms ease-out",
             }}
             id="home-create-room"
           >
@@ -189,6 +184,7 @@ export default function HomePage() {
           {/* TILE 2: JOIN ROOM (SOLID ACID YELLOW BLOCK) */}
           <div
             onClick={() => router.push("/room/join")}
+            className="home-action-card"
             style={{
               background: "var(--accent-alt)",
               color: "var(--ink)",
@@ -200,7 +196,6 @@ export default function HomePage() {
               flexDirection: "column",
               justifyContent: "space-between",
               minHeight: "220px",
-              transition: "transform 80ms ease-out, box-shadow 80ms ease-out",
             }}
             id="home-join-room"
           >
