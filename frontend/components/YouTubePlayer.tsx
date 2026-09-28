@@ -82,7 +82,8 @@ export default function YouTubePlayer() {
         videoId: currentSong.video_id || "",
         playerVars: {
           autoplay: 0,
-          controls: 1,
+          controls: isHost ? 1 : 0,
+          disablekb: isHost ? 0 : 1,
           enablejsapi: 1,
           modestbranding: 1,
           rel: 0,
@@ -105,6 +106,13 @@ export default function YouTubePlayer() {
               if (event.data === window.YT.PlayerState.PAUSED) {
                 const currentPosMs = Math.round((playerRef.current?.getCurrentTime?.() || 0) * 1000);
                 socket.emit("host_pause", { position_ms: currentPosMs });
+              }
+            } else if (!isHost && !isSyncingRef.current) {
+              // Viewer: prevent accidental pause or desync
+              if (currentSong.is_playing && event.data === window.YT.PlayerState.PAUSED) {
+                try { playerRef.current?.playVideo?.(); } catch {}
+              } else if (!currentSong.is_playing && event.data === window.YT.PlayerState.PLAYING) {
+                try { playerRef.current?.pauseVideo?.(); } catch {}
               }
             }
           },
@@ -206,7 +214,7 @@ export default function YouTubePlayer() {
     }, 600);
   }, [currentSong, playerReady]);
 
-  // Progress update interval
+  // Progress update interval and continuous host synchronization
   useEffect(() => {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
@@ -221,13 +229,39 @@ export default function YouTubePlayer() {
           const socket = getSocketInstance();
           socket?.emit("host_seek", { position_ms: Math.round(currentTime * 1000) });
         }
+
+        // Strict synchronization for viewers
+        if (!isHost && !isSyncingRef.current && currentSong.video_id) {
+          let targetPosMs = currentSong.position_ms || 0;
+          if (currentSong.is_playing && currentSong.server_timestamp > 0) {
+            targetPosMs += Date.now() - currentSong.server_timestamp;
+          }
+          const targetPosSec = Math.max(0, targetPosMs / 1000);
+          const state = playerRef.current.getPlayerState?.();
+
+          if (currentSong.is_playing) {
+            // If viewer is paused (2), cued (5), or unstarted (-1), resume
+            if (state === 2 || state === 5 || state === -1) {
+              playerRef.current.playVideo?.();
+            }
+            // If viewer drifted by more than 1.5 seconds, resync position
+            if (Math.abs(currentTime - targetPosSec) > 1.5) {
+              playerRef.current.seekTo?.(targetPosSec, true);
+            }
+          } else {
+            // Host is paused, ensure viewer is paused
+            if (state === 1) {
+              playerRef.current.pauseVideo?.();
+            }
+          }
+        }
       } catch {}
     }, 1000);
 
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
-  }, [playerReady, currentSong.video_id, currentSong.is_playing, isHost]);
+  }, [playerReady, currentSong.video_id, currentSong.is_playing, currentSong.position_ms, currentSong.server_timestamp, isHost]);
 
   // Controls
   const togglePlayPause = () => {
@@ -279,7 +313,14 @@ export default function YouTubePlayer() {
   const handleManualPlay = () => {
     if (playerRef.current) {
       try {
-        playerRef.current.playVideo?.();
+        let targetPosMs = currentSong.position_ms || 0;
+        if (currentSong.is_playing && currentSong.server_timestamp > 0) {
+          targetPosMs += Date.now() - currentSong.server_timestamp;
+        }
+        playerRef.current.seekTo?.(Math.max(0, targetPosMs / 1000), true);
+        if (currentSong.is_playing) {
+          playerRef.current.playVideo?.();
+        }
         playerRef.current.unMute?.();
       } catch {}
       setAutoplayBlocked(false);
@@ -319,6 +360,19 @@ export default function YouTubePlayer() {
         background: "#000",
       }}>
         <div id="yt-player-iframe" style={{ width: "100%", height: "100%" }}></div>
+
+        {/* Guest click shield: Only host can click/pause/scrub the video player */}
+        {!isHost && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 4,
+              cursor: "default",
+            }}
+            title="Playback controlled by Host"
+          />
+        )}
 
         {isDucked && (
           <div style={{

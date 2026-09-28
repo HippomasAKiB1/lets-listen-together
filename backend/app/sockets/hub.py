@@ -108,8 +108,12 @@ async def connect(sid, environ, auth):
     await sio.emit(
         "sync_state",
         {
-            "members": _get_members_list(room_id),
+            "room_id": room_id,
+            "room_name": room.room_name if room else "Listening Room",
+            "invite_code": room.invite_code if room else "",
+            "max_members": room.max_members if room else 8,
             "host_id": room.host_id if room else None,
+            "members": _get_members_list(room_id),
             "current_song": {
                 "video_id": song.video_id if song else None,
                 "song_title": song.song_title if song else None,

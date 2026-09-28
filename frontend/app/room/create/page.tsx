@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useRoomStore } from "@/store/roomStore";
 import api from "@/lib/api";
 
 export default function CreateRoomPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const { setRoom } = useRoomStore();
   const [roomName, setRoomName] = useState("");
   const [password, setPassword] = useState("");
   const [maxMembers, setMaxMembers] = useState(8);
@@ -37,6 +39,14 @@ export default function CreateRoomPage() {
         max_members: Number(maxMembers),
       });
       setCreatedRoom(res.data);
+      setRoom({
+        roomId: res.data.room_id,
+        roomName: res.data.room_name,
+        hostId: res.data.host_id,
+        inviteCode: res.data.invite_code,
+        members: [],
+        currentSong: {},
+      });
     } catch (err: any) {
       const detail = err?.response?.data?.detail;
       let msg = "Failed to create room. Please try again.";

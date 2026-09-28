@@ -290,3 +290,52 @@ async def search_youtube(
         print(f"Error calling YouTube Search API: {e}")
         # Fallback to local mocks
         return {"results": FALLBACK_MOCKS}
+
+
+@router.get("/{room_id}", response_model=JoinRoomResponse)
+async def get_room(
+    room_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Room).where(Room.room_id == room_id, Room.is_active == True)
+    )
+    room = result.scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    members_result = await db.execute(
+        select(User)
+        .join(RoomMember, RoomMember.user_id == User.user_id)
+        .where(RoomMember.room_id == room.room_id)
+    )
+    users = members_result.scalars().all()
+    members = [MemberInfo(user_id=u.user_id, username=u.username) for u in users]
+
+    song_result = await db.execute(
+        select(CurrentSong).where(CurrentSong.room_id == room.room_id)
+    )
+    song = song_result.scalar_one_or_none()
+    current_song = CurrentSongInfo(
+        video_id=song.video_id if song else None,
+        song_title=song.song_title if song else None,
+        artist=song.artist if song else None,
+        thumbnail_url=song.thumbnail_url if song else None,
+        duration_seconds=song.duration_seconds if song else 0,
+        position_ms=song.position_ms if song else 0,
+        is_playing=song.is_playing if song else False,
+        server_timestamp=song.server_timestamp if song else 0,
+        mode=song.mode if song else "youtube",
+    ) if song else CurrentSongInfo()
+
+    return JoinRoomResponse(
+        room_id=room.room_id,
+        room_name=room.room_name,
+        host_id=room.host_id,
+        invite_code=room.invite_code,
+        max_members=room.max_members,
+        members=members,
+        current_song=current_song,
+    )
+

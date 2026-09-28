@@ -20,6 +20,7 @@ import YouTubePlayer from "@/components/YouTubePlayer";
 import ScreenShareViewer from "@/components/ScreenShareViewer";
 import MusicControls from "@/components/MusicControls";
 import ModeSelector from "@/components/ModeSelector";
+import api from "@/lib/api";
 
 function RoomContent() {
   const router = useRouter();
@@ -61,6 +62,23 @@ function RoomContent() {
 
     const setup = async () => {
       try {
+        // Pre-fetch room metadata so host and guests see room name & invite code immediately
+        try {
+          const roomRes = await api.get(`/rooms/${roomId}`);
+          if (roomRes?.data) {
+            setRoom({
+              roomId,
+              roomName: roomRes.data.room_name,
+              hostId: roomRes.data.host_id,
+              inviteCode: roomRes.data.invite_code,
+              members: roomRes.data.members || [],
+              currentSong: roomRes.data.current_song || {},
+            });
+          }
+        } catch (e) {
+          console.warn("Could not pre-fetch room metadata:", e);
+        }
+
         // A. Capture microphone stream
         try {
           await initLocalStream();
@@ -76,9 +94,9 @@ function RoomContent() {
         socket.on("sync_state", (data: any) => {
           setRoom({
             roomId,
-            roomName: data.roomName || roomName || "Listening Room",
+            roomName: data.room_name || data.roomName || useRoomStore.getState().roomName || "Listening Room",
             hostId: data.host_id,
-            inviteCode: inviteCode || "",
+            inviteCode: data.invite_code || data.inviteCode || useRoomStore.getState().inviteCode || "",
             members: data.members || [],
             currentSong: data.current_song || {},
           });
@@ -248,17 +266,38 @@ function RoomContent() {
         zIndex: 5,
       }}>
         <div>
-          <h2 style={{ fontSize: "16px", fontWeight: "700" }}>{roomName || "Listening Room"}</h2>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "2px" }}>
-            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Invite code:</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "16px" }}>🎵</span>
+            <h2 style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary)" }}>
+              {roomName || "Listening Room"}
+            </h2>
+          </div>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px" }}>
+            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Code:</span>
             <code style={{
-              background: "var(--bg-card)",
-              padding: "2px 6px",
+              background: "rgba(124, 58, 237, 0.15)",
+              border: "1px solid rgba(124, 58, 237, 0.3)",
+              padding: "2px 8px",
               borderRadius: "4px",
               fontSize: "12px",
               fontWeight: "700",
+              letterSpacing: "0.05em",
               color: "#A78BFA",
-            }}>{inviteCode}</code>
+            }}>
+              {inviteCode || "—"}
+            </code>
+            {inviteCode && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteCode);
+                }}
+                className="btn btn-ghost btn-sm"
+                style={{ padding: "2px 6px", height: "auto", fontSize: "11px", color: "var(--text-secondary)" }}
+                title="Copy Invite Code"
+              >
+                Copy
+              </button>
+            )}
           </div>
         </div>
 
