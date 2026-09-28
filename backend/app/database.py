@@ -4,9 +4,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 
+from sqlalchemy.engine import make_url
+
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+# Check DATABASE_URL (and DTABASE_URL fallback in case of env variable typo)
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DTABASE_URL", "")
+
+connect_args = {}
+engine_kwargs = {
+    "echo": False,
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
 
 if DATABASE_URL:
     # Render provides connection strings starting with postgres://, but SQLAlchemy 1.4+
@@ -16,14 +26,29 @@ if DATABASE_URL:
     elif DATABASE_URL.startswith("postgresql://"):
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,
-    # Required for Supabase direct connection stability
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-)
+    try:
+        url = make_url(DATABASE_URL)
+        if "asyncpg" in url.drivername or "postgresql" in url.drivername:
+            # Required for transaction poolers like Neon's PgBouncer / Supabase pooler
+            connect_args["statement_cache_size"] = 0
+            connect_args["prepared_statement_cache_size"] = 0
+
+            # asyncpg requires 'ssl' instead of libpq's 'sslmode'
+            query = dict(url.query)
+            if "sslmode" in query:
+                query["ssl"] = query.pop("sslmode")
+                url = url.set(query=query)
+                DATABASE_URL = url.render_as_string(hide_password=False)
+
+            engine_kwargs["pool_size"] = 5
+            engine_kwargs["max_overflow"] = 10
+    except Exception:
+        pass
+
+if connect_args:
+    engine_kwargs["connect_args"] = connect_args
+
+engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
