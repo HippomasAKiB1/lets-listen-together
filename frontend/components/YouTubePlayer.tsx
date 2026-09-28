@@ -83,6 +83,7 @@ export default function YouTubePlayer() {
       clearInterval(interval);
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initPlayer = () => {
@@ -312,7 +313,7 @@ export default function YouTubePlayer() {
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
-  }, [playerReady, currentSong.video_id, currentSong.is_playing, currentSong.position_ms, currentSong.server_timestamp, isHost]);
+  }, [playerReady, currentSong.video_id, currentSong.is_playing, currentSong.position_ms, currentSong.server_timestamp, currentSong.duration_seconds, isHost]);
 
   // Controls
   const togglePlayPause = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,23 +25,7 @@ export default function InvitePage({ params }: InvitePageProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [roomDetails, setRoomDetails] = useState<{ roomName?: string } | null>(null);
 
-  useEffect(() => {
-    if (!token) {
-      setErrorMessage("NO INVITATION CODE PROVIDED.");
-      setStatus("error");
-      return;
-    }
-
-    if (!isAuthenticated()) {
-      const destination = `/invite/${token}`;
-      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-      return;
-    }
-
-    handleJoinRoom();
-  }, [token, isAuthenticated, router]);
-
-  const handleJoinRoom = async (pwd?: string) => {
+  const handleJoinRoom = useCallback(async (pwd?: string) => {
     setStatus("joining");
     setErrorMessage("");
 
@@ -90,7 +74,23 @@ export default function InvitePage({ params }: InvitePageProps) {
         );
       }
     }
-  };
+  }, [token, password, setRoom, router]);
+
+  useEffect(() => {
+    if (!token) {
+      setErrorMessage("NO INVITATION CODE PROVIDED.");
+      setStatus("error");
+      return;
+    }
+
+    if (!isAuthenticated()) {
+      const destination = `/invite/${token}`;
+      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+      return;
+    }
+
+    handleJoinRoom();
+  }, [token, isAuthenticated, router, handleJoinRoom]);
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,16 +120,16 @@ export default function InvitePage({ params }: InvitePageProps) {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            padding: "12px 24px",
+            padding: "16px 32px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
               alt="TuneTogether"
-              width={160}
-              height={56}
+              width={200}
+              height={80}
               priority
-              style={{ height: "56px", width: "auto", objectFit: "contain" }}
+              style={{ height: "80px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -188,7 +188,7 @@ export default function InvitePage({ params }: InvitePageProps) {
                 ENTERING ROOM NOW
               </h2>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
-                LOADING SESSION: {roomDetails?.roomName ? `"${roomDetails.roomName}"` : token}…
+                CONNECTING TO {roomDetails?.roomName ? `"${roomDetails.roomName}"` : token}…
               </p>
             </div>
           )}

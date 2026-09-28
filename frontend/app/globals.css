@@ -104,7 +104,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   border: var(--border);
   box-shadow: var(--shadow-hard-sm);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background-color 80ms ease-out;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background-color 80ms ease-out, color 80ms ease-out;
   border-radius: 0 !important;
   white-space: nowrap;
 }
@@ -116,7 +116,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn:active:not(:disabled) {
   transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px transparent;
+  box-shadow: 1px 1px 0px #0A0A0A;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -126,35 +131,28 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: none !important;
 }
 
+/* ROLE 1: PRIMARY */
 .btn-primary {
   background: var(--accent);
   color: #FFFFFF;
   border: var(--border);
 }
 .btn-primary:hover:not(:disabled) {
-  background: #E04400;
-  color: #FFFFFF;
+  background: var(--ink);
+  color: var(--accent);
+  border-color: var(--ink);
 }
 
+/* ROLE 2: SECONDARY / OUTLINED */
 .btn-secondary {
   background: var(--accent-alt);
   color: var(--ink);
   border: var(--border);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: #D4EC00;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 2px solid transparent;
-  box-shadow: none;
-}
-.btn-ghost:hover:not(:disabled) {
-  border: var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow-hard-sm);
+  background: var(--ink);
+  color: var(--accent-alt);
+  border-color: var(--ink);
 }
 
 .btn-outline {
@@ -174,7 +172,34 @@ h1, h2, h3, h4, h5, h6 {
   border: var(--border);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #CC1A1A;
+  background: var(--ink);
+  color: var(--error);
+}
+
+/* ROLE 3: GHOST */
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid transparent;
+  box-shadow: none;
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.btn-ghost-dark {
+  background: transparent;
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+.btn-ghost-dark:hover:not(:disabled) {
+  border-color: #FFFFFF;
+  background: #262626;
+  color: var(--accent-alt);
 }
 
 .btn-sm {

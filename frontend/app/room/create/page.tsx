@@ -129,7 +129,7 @@ export default function CreateRoomPage() {
                 </div>
                 <div style={{
                   background: "var(--ink)",
-                  padding: "6px 14px",
+                  padding: "8px 18px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -137,10 +137,10 @@ export default function CreateRoomPage() {
                   <Image
                     src="/assets/app-logo-trans.png"
                     alt="TuneTogether"
-                    width={80}
-                    height={32}
+                    width={120}
+                    height={48}
                     priority
-                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                    style={{ height: "48px", width: "auto", objectFit: "contain" }}
                   />
                 </div>
               </div>

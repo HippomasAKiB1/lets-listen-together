@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,22 +23,7 @@ function JoinRoomContent() {
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const targetUrl = codeParam ? `/room/join?code=${codeParam}` : "/room/join";
-
-    if (!isAuthenticated()) {
-      router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
-      return;
-    }
-
-    if (codeParam) {
-      setInviteCode(codeParam);
-      executeJoin(codeParam, "");
-    }
-  }, [isAuthenticated, router, searchParams]);
-
-  const executeJoin = async (codeToJoin: string, pwd?: string) => {
+  const executeJoin = useCallback(async (codeToJoin: string, pwd?: string) => {
     setError("");
     setLoading(true);
     try {
@@ -82,7 +67,22 @@ function JoinRoomContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [password, setRoom, router]);
+
+  useEffect(() => {
+    setMounted(true);
+    const targetUrl = codeParam ? `/room/join?code=${codeParam}` : "/room/join";
+
+    if (!isAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
+      return;
+    }
+
+    if (codeParam) {
+      setInviteCode(codeParam);
+      executeJoin(codeParam, "");
+    }
+  }, [isAuthenticated, router, codeParam, executeJoin]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +156,7 @@ function JoinRoomContent() {
                 </div>
                 <div style={{
                   background: "var(--ink)",
-                  padding: "6px 14px",
+                  padding: "8px 18px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -164,10 +164,10 @@ function JoinRoomContent() {
                   <Image
                     src="/assets/app-logo-trans.png"
                     alt="TuneTogether"
-                    width={80}
-                    height={32}
+                    width={120}
+                    height={48}
                     priority
-                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                    style={{ height: "48px", width: "auto", objectFit: "contain" }}
                   />
                 </div>
               </div>

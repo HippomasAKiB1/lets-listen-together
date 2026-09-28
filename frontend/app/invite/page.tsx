@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,22 +21,7 @@ function InviteQueryContent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [roomDetails, setRoomDetails] = useState<{ roomName?: string } | null>(null);
 
-  useEffect(() => {
-    if (!code) {
-      router.push("/room/join");
-      return;
-    }
-
-    if (!isAuthenticated()) {
-      const destination = `/invite?code=${code}`;
-      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-      return;
-    }
-
-    handleJoinRoom();
-  }, [code, isAuthenticated, router]);
-
-  const handleJoinRoom = async (pwd?: string) => {
+  const handleJoinRoom = useCallback(async (pwd?: string) => {
     setStatus("joining");
     setErrorMessage("");
 
@@ -85,7 +70,22 @@ function InviteQueryContent() {
         );
       }
     }
-  };
+  }, [code, password, setRoom, router]);
+
+  useEffect(() => {
+    if (!code) {
+      router.push("/room/join");
+      return;
+    }
+
+    if (!isAuthenticated()) {
+      const destination = `/invite?code=${code}`;
+      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+      return;
+    }
+
+    handleJoinRoom();
+  }, [code, isAuthenticated, router, handleJoinRoom]);
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,16 +115,16 @@ function InviteQueryContent() {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            padding: "12px 24px",
+            padding: "16px 32px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
               alt="TuneTogether"
-              width={160}
-              height={56}
+              width={200}
+              height={80}
               priority
-              style={{ height: "56px", width: "auto", objectFit: "contain" }}
+              style={{ height: "80px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -183,7 +183,7 @@ function InviteQueryContent() {
                 ENTERING ROOM NOW
               </h2>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--muted)", fontWeight: 700 }}>
-                LOADING SESSION: {roomDetails?.roomName ? `"${roomDetails.roomName}"` : code}…
+                CONNECTING TO {roomDetails?.roomName ? `"${roomDetails.roomName}"` : code}…
               </p>
             </div>
           )}

@@ -60,16 +60,16 @@ function RegisterContent() {
             alignItems: "center",
             justifyContent: "center",
             background: "var(--ink)",
-            padding: "12px 24px",
+            padding: "16px 32px",
             marginBottom: "16px",
           }}>
             <Image
               src="/assets/app-logo-trans.png"
               alt="TuneTogether"
-              width={160}
-              height={56}
+              width={200}
+              height={80}
               priority
-              style={{ height: "56px", width: "auto", objectFit: "contain" }}
+              style={{ height: "80px", width: "auto", objectFit: "contain" }}
             />
           </div>
           <h1 style={{ fontSize: "28px", letterSpacing: "-0.03em" }}>
@@ -119,7 +119,7 @@ function RegisterContent() {
               alignItems: "center",
               gap: "8px",
             }}>
-              <span>INVITE DETECTED — SIGN IN TO JOIN</span>
+              <span>INVITE DETECTED — CREATE ACCOUNT TO JOIN</span>
             </div>
           )}
 

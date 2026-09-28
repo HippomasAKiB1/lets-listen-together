@@ -47,10 +47,10 @@ export default function HomePage() {
           <Image
             src="/assets/app-logo-trans.png"
             alt="TuneTogether"
-            width={96}
-            height={36}
+            width={120}
+            height={44}
             priority
-            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+            style={{ height: "44px", width: "auto", objectFit: "contain" }}
           />
           <span style={{
             fontFamily: "var(--font-display)",
@@ -76,7 +76,7 @@ export default function HomePage() {
             fontWeight: 700,
           }}>
             <span className="online-dot" />
-            <span>USER: {username}</span>
+            <span>{username}</span>
           </div>
 
           <button onClick={handleLogout} className="btn btn-secondary btn-sm" id="home-logout">
@@ -169,7 +169,7 @@ export default function HomePage() {
                 CREATE ROOM
               </h2>
               <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, opacity: 0.95 }}>
-                HOST A FRESH SYNCHRONIZED ROOM. FULL QUEUE CONTROL, WEBRTC VOICE MESH & LIVE SHARING.
+                HOST A FRESH SYNCHRONIZED ROOM. FULL QUEUE CONTROL, WEBRTC VOICE CHAT & LIVE SHARING.
               </p>
             </div>
 

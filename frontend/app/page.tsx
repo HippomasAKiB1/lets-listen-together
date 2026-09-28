@@ -16,12 +16,12 @@ export default function LandingPage() {
   const loggedIn = mounted && isAuthenticated();
 
   const mosaicTiles = [
-    { tag: "VINYL", title: "DAFT PUNK", sub: "RANDOM ACCESS MEMORIES", bg: "var(--accent-alt)", color: "#0A0A0A" },
-    { tag: "CONCERT", title: "THE WEEKND", sub: "AFTER HOURS AT SOFI", bg: "#0A0A0A", color: "#F2EFE6" },
-    { tag: "SOUNDTRACK", title: "DUNE: PART TWO", sub: "HANS ZIMMER SCORE", bg: "var(--accent)", color: "#FFFFFF" },
-    { tag: "SESSION", title: "RADIOHEAD", sub: "IN RAINBOWS BASEMENT", bg: "#FFFFFF", color: "#0A0A0A" },
-    { tag: "LIVE", title: "INTERSTELLAR", sub: "ROYAL ALBERT HALL LIVE", bg: "var(--signal-blue)", color: "#FFFFFF" },
-    { tag: "ALBUM", title: "BLONDE", sub: "FRANK OCEAN REISSUE", bg: "#E8E4D9", color: "#0A0A0A" },
+    { bg: "var(--accent-alt)" },
+    { bg: "#0A0A0A" },
+    { bg: "var(--accent)" },
+    { bg: "#FFFFFF" },
+    { bg: "var(--signal-blue)" },
+    { bg: "#E8E4D9" },
   ];
 
   return (
@@ -53,10 +53,10 @@ export default function LandingPage() {
           <Image
             src="/assets/app-logo-trans.png"
             alt="TuneTogether"
-            width={96}
-            height={36}
+            width={120}
+            height={44}
             priority
-            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+            style={{ height: "44px", width: "auto", objectFit: "contain" }}
           />
           <span style={{
             fontFamily: "var(--font-display)",
@@ -82,7 +82,7 @@ export default function LandingPage() {
             </>
           ) : (
             <>
-              <Link href="/login" className="btn btn-ghost btn-sm" style={{ color: "#FFFFFF" }} id="landing-login-btn">
+              <Link href="/login" className="btn btn-ghost-dark btn-sm" id="landing-login-btn">
                 SIGN IN
               </Link>
               <Link href="/register" className="btn btn-primary btn-sm" id="landing-register-btn">
@@ -97,7 +97,7 @@ export default function LandingPage() {
       <main style={{
         flex: 1,
         display: "grid",
-        gridTemplateColumns: "1.05fr 0.95fr",
+        gridTemplateColumns: "1.08fr 0.92fr",
         minHeight: 0,
         overflow: "hidden",
       }}>
@@ -107,7 +107,7 @@ export default function LandingPage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "32px",
+          padding: "24px 32px",
           borderRight: "var(--border)",
           background: "var(--bg)",
           overflowY: "auto",
@@ -119,7 +119,7 @@ export default function LandingPage() {
               justifyContent: "space-between",
               borderBottom: "var(--border-thin)",
               paddingBottom: "8px",
-              marginBottom: "24px",
+              marginBottom: "16px",
               fontSize: "11px",
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
@@ -128,17 +128,36 @@ export default function LandingPage() {
               <span style={{ color: "var(--accent)" }}>LIVE STREAMING</span>
             </div>
 
+            {/* Prominent Hero Logo on solid contrasting ink background */}
+            <div style={{
+              background: "var(--ink)",
+              padding: "12px 24px",
+              display: "inline-flex",
+              alignItems: "center",
+              marginBottom: "18px",
+              border: "var(--border)",
+            }}>
+              <Image
+                src="/assets/app-logo-trans.png"
+                alt="TuneTogether"
+                width={260}
+                height={96}
+                priority
+                style={{ height: "96px", width: "auto", objectFit: "contain" }}
+              />
+            </div>
+
             {/* Headline */}
             <h1 style={{
-              fontSize: "clamp(38px, 5vw, 64px)",
+              fontSize: "clamp(32px, 3.8vw, 54px)",
               lineHeight: "0.95",
               letterSpacing: "-0.04em",
-              marginBottom: "20px",
+              marginBottom: "16px",
               color: "var(--ink)",
             }}>
               LISTEN TOGETHER.<br />
               WATCH TOGETHER.<br />
-              <span style={{ background: "var(--ink)", color: "var(--accent-alt)", padding: "0 6px" }}>
+              <span style={{ color: "var(--accent)" }}>
                 IN REAL TIME.
               </span>
             </h1>
@@ -148,12 +167,12 @@ export default function LandingPage() {
               background: "var(--surface)",
               border: "var(--border)",
               boxShadow: "var(--shadow-hard-sm)",
-              padding: "16px",
-              marginBottom: "28px",
+              padding: "14px 16px",
+              marginBottom: "20px",
             }}>
               <p style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "13px",
+                fontSize: "12px",
                 lineHeight: "1.5",
                 fontWeight: "700",
                 color: "var(--ink)",
@@ -163,7 +182,7 @@ export default function LandingPage() {
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "28px" }}>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "20px" }}>
               {loggedIn ? (
                 <>
                   <Link href="/room/create" className="btn btn-primary btn-lg" id="landing-create-cta">
@@ -209,11 +228,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: FLAT HARD-BORDERED MOSAIC POSTER GRID */}
+        {/* RIGHT COLUMN: FLAT HARD-BORDERED PURE VISUAL COLOR MOSAIC GRID (100% TEXT-FREE) */}
         <section style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "repeat(3, 1fr)",
+          gridTemplateColumns: "1.1fr 0.9fr",
+          gridTemplateRows: "1.2fr 0.8fr 1fr",
           background: "var(--ink)",
           gap: "2px",
           overflow: "hidden",
@@ -223,49 +242,11 @@ export default function LandingPage() {
               key={i}
               style={{
                 background: tile.bg,
-                color: tile.color,
-                padding: "20px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
+                width: "100%",
+                height: "100%",
                 position: "relative",
-                overflow: "hidden",
-                border: "1px solid #0A0A0A",
               }}
-            >
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <span style={{
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.08em",
-                  border: "1px solid currentColor",
-                  padding: "2px 6px",
-                }}>
-                  {tile.tag}
-                </span>
-              </div>
-
-              <div>
-                <h3 style={{
-                  fontSize: "clamp(16px, 1.8vw, 22px)",
-                  fontFamily: "var(--font-display)",
-                  lineHeight: "1.05",
-                  marginBottom: "4px",
-                  letterSpacing: "-0.02em",
-                }}>
-                  {tile.title}
-                </h3>
-                <p style={{
-                  fontSize: "11px",
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 700,
-                  opacity: 0.9,
-                }}>
-                  {tile.sub}
-                </p>
-              </div>
-            </div>
+            />
           ))}
         </section>
       </main>

@@ -31,13 +31,12 @@ function RoomContent() {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("id");
 
-  const { token, userId, username, isAuthenticated } = useAuthStore();
+  const { token, userId, isAuthenticated } = useAuthStore();
   const {
     roomName,
     inviteCode,
     hostId,
     currentSong,
-    queue,
     setRoom,
     setMembers,
     setMemberSpeaking,
@@ -46,7 +45,6 @@ function RoomContent() {
     setCurrentSong,
     setQueue,
     addReaction,
-    removeReaction,
     addMessage,
     clearRoom,
   } = useRoomStore();
@@ -253,6 +251,7 @@ function RoomContent() {
     return () => {
       cleanupAndLeave();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, roomId]);
 
   const cleanupAndLeave = () => {
@@ -362,10 +361,10 @@ function RoomContent() {
           <Image
             src="/assets/app-logo-trans.png"
             alt="TuneTogether"
-            width={96}
-            height={36}
+            width={120}
+            height={44}
             priority
-            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+            style={{ height: "44px", width: "auto", objectFit: "contain" }}
           />
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -442,7 +441,7 @@ function RoomContent() {
           {currentSong.mode === "youtube" && <MusicControls />}
 
           {/* Player zone */}
-          <div style={{ flex: 1, minHeight: 0, position: "relative", background: "#000000" }}>
+          <div style={{ flex: 1, minHeight: 0, position: "relative", background: currentSong.mode === "screenshare" ? "#000000" : "var(--bg)" }}>
             {currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />}
             <FloatingReactions />
           </div>
