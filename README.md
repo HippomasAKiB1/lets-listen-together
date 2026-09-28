@@ -28,7 +28,9 @@ Built with an **Acid Brutalist / Industrial Swiss Grid** design aesthetic, Tune 
 
 ### 1. Drift-Compensated Media Sync
 - **Sub-100ms Alignment**: Clients calculate playback drift against authoritative host timestamps using network latency compensation:
-  $$\Delta t = \text{position\_ms} + (t_{\text{local}} - t_{\text{server\_epoch}})$$
+  ```text
+  target_position = position_ms + (local_time - server_timestamp)
+  ```
 - **Natural Resync**: Continuous clock drift is corrected dynamically without jarring player skips or buffer loops. Tracks transition smoothly and stop cleanly at the end boundary without accidental looping.
 - **Collaborative Up-Next Queue**: Any room member can queue YouTube tracks. The playlist automatically advances to the next track on song completion, and hosts retain full Next / Previous track controls.
 
