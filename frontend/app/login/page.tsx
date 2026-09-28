@@ -46,6 +46,16 @@ function LoginContent() {
     }}>
       <div style={{ width: "100%", maxWidth: "440px" }}>
         
+        {/* Navigation back to landing */}
+        <Link
+          href="/"
+          className="btn btn-ghost btn-sm"
+          style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
+          id="login-back-home"
+        >
+          <span>←</span> BACK TO HOME
+        </Link>
+
         {/* Brand Header */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <div style={{
@@ -60,6 +70,7 @@ function LoginContent() {
               width={200}
               height={80}
               priority
+              className="logo-contrast-light"
               style={{ height: "80px", width: "auto", objectFit: "contain" }}
             />
           </div>

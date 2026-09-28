@@ -137,6 +137,7 @@ export default function LandingPage() {
                 width={260}
                 height={96}
                 priority
+                className="logo-contrast-light"
                 style={{ height: "96px", width: "auto", objectFit: "contain" }}
               />
             </div>

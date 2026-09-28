@@ -19,7 +19,7 @@ export default function HomePage() {
 
   const handleLogout = () => {
     clearAuth();
-    router.push("/login");
+    router.push("/");
   };
 
   if (!mounted || !isAuthenticated()) return null;

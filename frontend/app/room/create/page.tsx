@@ -138,6 +138,7 @@ export default function CreateRoomPage() {
                     width={120}
                     height={48}
                     priority
+                    className="logo-contrast-light"
                     style={{ height: "48px", width: "auto", objectFit: "contain" }}
                   />
                 </div>
