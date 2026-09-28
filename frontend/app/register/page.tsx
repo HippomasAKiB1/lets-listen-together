@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/home";
   const { setAuth } = useAuthStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,7 @@ export default function RegisterPage() {
       // Auto-login
       const loginRes = await api.post("/auth/login", { username, password });
       setAuth(loginRes.data.access_token, loginRes.data.user_id, loginRes.data.username);
-      router.push("/home");
+      router.push(redirect);
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Registration failed. Please try again.");
     } finally {
@@ -125,7 +127,10 @@ export default function RegisterPage() {
 
           <p style={{ textAlign: "center", marginTop: "24px", color: "var(--text-secondary)", fontSize: "14px" }}>
             Already have an account?{" "}
-            <Link href="/" style={{ color: "#A78BFA", fontWeight: "600", textDecoration: "none" }}>
+            <Link
+              href={`/${redirect !== "/home" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+              style={{ color: "#A78BFA", fontWeight: "600", textDecoration: "none" }}
+            >
               Sign In
             </Link>
           </p>
@@ -134,3 +139,12 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0F0F0F" }} />}>
+      <RegisterContent />
+    </Suspense>
+  );
+}
+

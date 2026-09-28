@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/home";
   const { setAuth } = useAuthStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +23,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { username, password });
       setAuth(res.data.access_token, res.data.user_id, res.data.username);
-      router.push("/home");
+      router.push(redirect);
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Login failed. Check your credentials.");
     } finally {
@@ -61,6 +63,24 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="card" style={{ padding: "32px" }}>
+          {redirect !== "/home" && (
+            <div style={{
+              background: "rgba(124, 58, 237, 0.15)",
+              border: "1px solid rgba(124, 58, 237, 0.3)",
+              borderRadius: "10px",
+              padding: "10px 14px",
+              marginBottom: "20px",
+              fontSize: "13px",
+              color: "#C4B5FD",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <span>👋</span>
+              <span>You were invited to a room! Please sign in to join.</span>
+            </div>
+          )}
+
           <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "24px" }}>
             Sign In
           </h2>
@@ -114,7 +134,10 @@ export default function LoginPage() {
 
           <p style={{ textAlign: "center", marginTop: "24px", color: "var(--text-secondary)", fontSize: "14px" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/register" style={{ color: "#A78BFA", fontWeight: "600", textDecoration: "none" }}>
+            <Link
+              href={`/register${redirect !== "/home" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+              style={{ color: "#A78BFA", fontWeight: "600", textDecoration: "none" }}
+            >
               Create Account
             </Link>
           </p>
@@ -123,3 +146,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0F0F0F" }} />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+

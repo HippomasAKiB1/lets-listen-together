@@ -28,6 +28,9 @@ room_sessions: dict[str, dict[str, dict]] = {}
 # In-memory queues: { room_id: [ { video_id, song_title, artist, thumbnail_url, duration_seconds, added_by } ] }
 room_queues: dict[str, list[dict]] = {}
 
+# In-memory play history for Previous track: { room_id: [ { video_id, song_title, artist, thumbnail_url, duration_seconds } ] }
+room_history: dict[str, list[dict]] = {}
+
 # SID → room_id lookup for disconnect cleanup
 sid_to_room: dict[str, str] = {}
 
@@ -506,10 +509,11 @@ async def end_room(sid, data):
     await sio.emit("room_ended", {"reason": "Host ended the room"}, room=room_id)
     room_sessions.pop(room_id, None)
     room_queues.pop(room_id, None)
+    room_history.pop(room_id, None)
 
 
 # ─────────────────────────────────────────────
-# Song End & Queue Autoplay
+# Song End & Queue Autoplay / Next / Previous
 # ─────────────────────────────────────────────
 
 @sio.on("host_song_ended")
@@ -528,6 +532,15 @@ async def host_song_ended(sid, data):
                 select(CurrentSong).where(CurrentSong.room_id == room_id)
             )
             song = song_result.scalar_one_or_none()
+            if song and song.video_id:
+                # Save previous song to history
+                room_history.setdefault(room_id, []).append({
+                    "video_id": song.video_id,
+                    "song_title": song.song_title,
+                    "artist": song.artist,
+                    "thumbnail_url": song.thumbnail_url,
+                    "duration_seconds": song.duration_seconds,
+                })
             if song:
                 song.video_id = next_song.get("video_id")
                 song.song_title = next_song.get("song_title")
@@ -571,6 +584,137 @@ async def host_song_ended(sid, data):
             await db.commit()
 
     await sio.emit("song_ended", {"video_id": data.get("video_id")}, room=room_id)
+
+
+@sio.on("host_next_track")
+async def host_next_track(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+
+    queue = room_queues.get(room_id, [])
+    if not queue:
+        # If queue is empty, mark song ended
+        async with AsyncSessionLocal() as db:
+            song_result = await db.execute(select(CurrentSong).where(CurrentSong.room_id == room_id))
+            song = song_result.scalar_one_or_none()
+            if song:
+                song.is_playing = False
+                db.add(song)
+                await db.commit()
+        await sio.emit("song_ended", {}, room=room_id)
+        return
+
+    next_song = queue.pop(0)
+    server_ts = int(time.time() * 1000)
+
+    async with AsyncSessionLocal() as db:
+        song_result = await db.execute(select(CurrentSong).where(CurrentSong.room_id == room_id))
+        song = song_result.scalar_one_or_none()
+        if song and song.video_id:
+            room_history.setdefault(room_id, []).append({
+                "video_id": song.video_id,
+                "song_title": song.song_title,
+                "artist": song.artist,
+                "thumbnail_url": song.thumbnail_url,
+                "duration_seconds": song.duration_seconds,
+            })
+        if song:
+            song.video_id = next_song.get("video_id")
+            song.song_title = next_song.get("song_title")
+            song.artist = next_song.get("artist")
+            song.thumbnail_url = next_song.get("thumbnail_url")
+            song.duration_seconds = next_song.get("duration_seconds", 0)
+            song.position_ms = 0
+            song.is_playing = True
+            song.server_timestamp = server_ts
+            song.mode = "youtube"
+            db.add(song)
+            await db.commit()
+
+    await sio.emit("queue_updated", {"queue": queue}, room=room_id)
+    await sio.emit(
+        "play",
+        {
+            "event": "play",
+            "video_id": next_song.get("video_id"),
+            "song_title": next_song.get("song_title"),
+            "artist": next_song.get("artist"),
+            "thumbnail_url": next_song.get("thumbnail_url"),
+            "duration_seconds": next_song.get("duration_seconds", 0),
+            "position_ms": 0,
+            "server_timestamp": server_ts,
+        },
+        room=room_id,
+    )
+
+
+@sio.on("host_prev_track")
+async def host_prev_track(sid, data):
+    room_id = sid_to_room.get(sid)
+    if not room_id or not await _verify_host(sid, room_id):
+        return
+
+    history = room_history.get(room_id, [])
+    if not history:
+        # No history, seek current song to 0
+        server_ts = int(time.time() * 1000)
+        async with AsyncSessionLocal() as db:
+            song_result = await db.execute(select(CurrentSong).where(CurrentSong.room_id == room_id))
+            song = song_result.scalar_one_or_none()
+            if song:
+                song.position_ms = 0
+                song.server_timestamp = server_ts
+                db.add(song)
+                await db.commit()
+        await sio.emit("seek", {"event": "seek", "position_ms": 0, "server_timestamp": server_ts}, room=room_id)
+        return
+
+    prev_song = history.pop()
+    server_ts = int(time.time() * 1000)
+
+    async with AsyncSessionLocal() as db:
+        song_result = await db.execute(select(CurrentSong).where(CurrentSong.room_id == room_id))
+        song = song_result.scalar_one_or_none()
+        if song and song.video_id:
+            # Place current song back into the beginning of queue
+            room_queues.setdefault(room_id, []).insert(0, {
+                "video_id": song.video_id,
+                "song_title": song.song_title,
+                "artist": song.artist,
+                "thumbnail_url": song.thumbnail_url,
+                "duration_seconds": song.duration_seconds,
+                "added_by": "Host",
+            })
+        if song:
+            song.video_id = prev_song.get("video_id")
+            song.song_title = prev_song.get("song_title")
+            song.artist = prev_song.get("artist")
+            song.thumbnail_url = prev_song.get("thumbnail_url")
+            song.duration_seconds = prev_song.get("duration_seconds", 0)
+            song.position_ms = 0
+            song.is_playing = True
+            song.server_timestamp = server_ts
+            song.mode = "youtube"
+            db.add(song)
+            await db.commit()
+
+    await sio.emit("queue_updated", {"queue": room_queues.get(room_id, [])}, room=room_id)
+    await sio.emit(
+        "play",
+        {
+            "event": "play",
+            "video_id": prev_song.get("video_id"),
+            "song_title": prev_song.get("song_title"),
+            "artist": prev_song.get("artist"),
+            "thumbnail_url": prev_song.get("thumbnail_url"),
+            "duration_seconds": prev_song.get("duration_seconds", 0),
+            "position_ms": 0,
+            "server_timestamp": server_ts,
+        },
+        room=room_id,
+    )
+
 
 
 # ─────────────────────────────────────────────

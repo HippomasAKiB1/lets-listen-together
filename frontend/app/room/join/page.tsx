@@ -22,10 +22,12 @@ function JoinRoomContent() {
 
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated()) {
-      router.push("/");
-    }
     const codeParam = searchParams.get("code");
+    if (!isAuthenticated()) {
+      const target = codeParam ? `/room/join?code=${codeParam.trim().toUpperCase()}` : "/room/join";
+      router.push(`/?redirect=${encodeURIComponent(target)}`);
+      return;
+    }
     if (codeParam) {
       setInviteCode(codeParam.trim().toUpperCase());
     }

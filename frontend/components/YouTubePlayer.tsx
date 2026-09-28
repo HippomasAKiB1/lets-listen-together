@@ -18,9 +18,11 @@ export default function YouTubePlayer() {
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isSyncingRef = useRef<boolean>(false);
   const mountedRef = useRef<boolean>(false);
+  const initialLoadGraceRef = useRef<number>(0);
+  const hasEndedRef = useRef<boolean>(false);
 
   const { userId } = useAuthStore();
-  const { currentSong, hostId } = useRoomStore();
+  const { currentSong, hostId, queue } = useRoomStore();
   const isHost = userId === hostId;
 
   const [playerReady, setPlayerReady] = useState(false);
@@ -112,21 +114,34 @@ export default function YouTubePlayer() {
               setAutoplayBlocked(false);
             }
             if (event.data === window.YT.PlayerState.ENDED) {
-              if (isHost) {
+              if (isHost && !hasEndedRef.current) {
+                hasEndedRef.current = true;
                 const socket = getSocketInstance();
                 socket?.emit("host_song_ended", { video_id: currentSong.video_id });
               }
               return;
             }
             if (isHost && !isSyncingRef.current) {
+              const currentSec = playerRef.current?.getCurrentTime?.() || 0;
+              const duration = currentSong.duration_seconds || 0;
+              // If paused within 1.5s of track completion, it is track completion!
+              if (duration > 0 && currentSec >= duration - 1.5) {
+                if (!hasEndedRef.current) {
+                  hasEndedRef.current = true;
+                  const socket = getSocketInstance();
+                  socket?.emit("host_song_ended", { video_id: currentSong.video_id });
+                }
+                return;
+              }
+
               const socket = getSocketInstance();
               if (!socket) return;
               if (event.data === window.YT.PlayerState.PAUSED) {
-                const currentPosMs = Math.round((playerRef.current?.getCurrentTime?.() || 0) * 1000);
+                const currentPosMs = Math.round(currentSec * 1000);
                 socket.emit("host_pause", { position_ms: currentPosMs });
               }
-            } else if (!isHost && !isSyncingRef.current) {
-              // Viewer: prevent accidental pause or desync
+            } else if (!isHost && !isSyncingRef.current && Date.now() > initialLoadGraceRef.current) {
+              // Viewer: prevent accidental pause or desync after initial load
               if (currentSong.is_playing && event.data === window.YT.PlayerState.PAUSED) {
                 try { playerRef.current?.playVideo?.(); } catch {}
               } else if (!currentSong.is_playing && event.data === window.YT.PlayerState.PLAYING) {
@@ -186,6 +201,8 @@ export default function YouTubePlayer() {
     const loadedId = playerRef.current.getVideoData?.()?.video_id;
 
     if (loadedId !== videoId) {
+      hasEndedRef.current = false;
+      initialLoadGraceRef.current = Date.now() + 3500;
       if (currentSong.is_playing) {
         try {
           playerRef.current.loadVideoById({
@@ -203,13 +220,13 @@ export default function YouTubePlayer() {
       }
     } else {
       const currentPosSec = playerRef.current.getCurrentTime?.() || 0;
-      if (Math.abs(currentPosSec - targetPosSec) > 2) {
+      if (Math.abs(currentPosSec - targetPosSec) > 2.5) {
         try { playerRef.current.seekTo?.(targetPosSec, true); } catch {}
       }
 
       if (currentSong.is_playing) {
         const state = playerRef.current.getPlayerState?.();
-        if (state !== 1) { // 1 = PLAYING
+        if (state !== 1 && state !== 3) { // not PLAYING and not BUFFERING
           try {
             const playPromise = playerRef.current.playVideo?.();
             if (playPromise && playPromise.catch) {
@@ -229,7 +246,7 @@ export default function YouTubePlayer() {
 
     setTimeout(() => {
       isSyncingRef.current = false;
-    }, 600);
+    }, 1200);
   }, [currentSong, playerReady]);
 
   // Progress update interval and continuous host synchronization
@@ -242,28 +259,44 @@ export default function YouTubePlayer() {
         const currentTime = playerRef.current.getCurrentTime?.() || 0;
         setLocalProgress(currentTime);
 
+        // Host: detect track ending near the duration boundary
+        if (isHost && currentSong.is_playing && currentSong.duration_seconds > 0 && currentTime >= currentSong.duration_seconds - 0.8) {
+          if (!hasEndedRef.current) {
+            hasEndedRef.current = true;
+            const socket = getSocketInstance();
+            socket?.emit("host_song_ended", { video_id: currentSong.video_id });
+          }
+          return;
+        }
+
         // Keep database progress synced periodically by host
         if (isHost && currentSong.is_playing && Math.random() < 0.2) {
           const socket = getSocketInstance();
           socket?.emit("host_seek", { position_ms: Math.round(currentTime * 1000) });
         }
 
-        // Strict synchronization for viewers
-        if (!isHost && !isSyncingRef.current && currentSong.video_id) {
+        // Natural, smooth synchronization for viewers
+        if (!isHost && !isSyncingRef.current && currentSong.video_id && Date.now() > initialLoadGraceRef.current) {
+          const state = playerRef.current.getPlayerState?.();
+
+          // Never interrupt while buffering (3) or unstarted (-1)
+          if (state === 3 || state === -1) {
+            return;
+          }
+
           let targetPosMs = currentSong.position_ms || 0;
           if (currentSong.is_playing && currentSong.server_timestamp > 0) {
             targetPosMs += Date.now() - currentSong.server_timestamp;
           }
           const targetPosSec = Math.max(0, targetPosMs / 1000);
-          const state = playerRef.current.getPlayerState?.();
 
           if (currentSong.is_playing) {
-            // If viewer is paused (2), cued (5), or unstarted (-1), resume
-            if (state === 2 || state === 5 || state === -1) {
+            // Resume if paused
+            if (state === 2 || state === 5) {
               playerRef.current.playVideo?.();
             }
-            // If viewer drifted by more than 1.5 seconds, resync position
-            if (Math.abs(currentTime - targetPosSec) > 1.5) {
+            // Only seek if drift exceeds 2.5s (prevents audio micro-stutters and buffer loops)
+            if (state === 1 && Math.abs(currentTime - targetPosSec) > 2.5) {
               playerRef.current.seekTo?.(targetPosSec, true);
             }
           } else {
@@ -314,6 +347,27 @@ export default function YouTubePlayer() {
     const socket = getSocketInstance();
     if (socket) {
       socket.emit("host_seek", { position_ms: Math.round(targetSeconds * 1000) });
+    }
+  };
+
+  const handleNextTrack = () => {
+    if (!isHost) return;
+    hasEndedRef.current = false;
+    const socket = getSocketInstance();
+    socket?.emit("host_next_track", {});
+  };
+
+  const handlePrevTrack = () => {
+    if (!isHost) return;
+    hasEndedRef.current = false;
+    const currentTime = playerRef.current?.getCurrentTime?.() || 0;
+    if (currentTime > 3) {
+      playerRef.current?.seekTo?.(0, true);
+      const socket = getSocketInstance();
+      socket?.emit("host_seek", { position_ms: 0 });
+    } else {
+      const socket = getSocketInstance();
+      socket?.emit("host_prev_track", {});
     }
   };
 
@@ -514,7 +568,27 @@ export default function YouTubePlayer() {
           </div>
 
           {/* Playback & Volume Controls */}
-          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "16px" }}>
+            {/* Host Previous Track Button */}
+            {isHost && (
+              <button
+                onClick={handlePrevTrack}
+                className="btn btn-secondary"
+                style={{
+                  borderRadius: "50%",
+                  width: "44px",
+                  height: "44px",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Previous Track / Rewind (⏮)"
+              >
+                <span style={{ fontSize: "16px" }}>⏮</span>
+              </button>
+            )}
+
             {isHost ? (
               <button
                 onClick={togglePlayPause}
@@ -535,6 +609,27 @@ export default function YouTubePlayer() {
               }}>
                 🔒 Controlled by Host
               </div>
+            )}
+
+            {/* Host Next Track Button */}
+            {isHost && (
+              <button
+                onClick={handleNextTrack}
+                className="btn btn-secondary"
+                style={{
+                  borderRadius: "50%",
+                  width: "44px",
+                  height: "44px",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: queue.length > 0 ? 1 : 0.65,
+                }}
+                title={queue.length > 0 ? `Next: ${queue[0]?.song_title}` : "Next Track (Queue is empty)"}
+              >
+                <span style={{ fontSize: "16px" }}>⏭</span>
+              </button>
             )}
 
             {/* Volume slider */}

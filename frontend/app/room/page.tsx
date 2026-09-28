@@ -52,7 +52,7 @@ function RoomContent() {
 
   const socketRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
-  const [micMuted, setMicMuted] = useState(false);
+  const [micMuted, setMicMuted] = useState(true);
   const [micError, setMicError] = useState("");
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -92,9 +92,10 @@ function RoomContent() {
           console.warn("Could not pre-fetch room metadata:", e);
         }
 
-        // A. Capture microphone stream
+        // A. Capture microphone stream (default to muted)
         try {
           await initLocalStream();
+          setMuted(true);
         } catch (err) {
           console.warn("Microphone access denied:", err);
           setMicError("Microphone access denied. You won't be able to speak, but you can listen.");
