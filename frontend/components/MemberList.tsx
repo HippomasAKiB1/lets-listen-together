@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRoomStore } from "@/store/roomStore";
 import { useAuthStore } from "@/store/authStore";
 import { getSocketInstance } from "@/lib/socket";
+import { useConfirm } from "@/components/ConfirmModal";
 import SpeakingIndicator from "./SpeakingIndicator";
 
 interface MemberListProps {
@@ -19,19 +20,34 @@ export default function MemberList({ onClose, isDrawer = false, className = "", 
   const isCurrentHost = userId === hostId;
 
   const [activeMenuUserId, setActiveMenuUserId] = useState<string | null>(null);
+  const confirm = useConfirm();
 
-  const handleTransferHost = (targetUserId: string) => {
+  const handleTransferHost = async (targetUserId: string, username: string) => {
     if (!isCurrentHost) return;
-    if (confirm("TRANSFER HOST PERMISSIONS TO THIS MEMBER?")) {
+    const ok = await confirm({
+      title: "MAKE HOST",
+      message: `MAKE ${username.toUpperCase()} THE HOST? YOU WILL LOSE HOST CONTROLS.`,
+      variant: "danger",
+      confirmLabel: "MAKE HOST",
+      cancelLabel: "CANCEL",
+    });
+    if (ok) {
       const socket = getSocketInstance();
       socket?.emit("transfer_host", { new_host_id: targetUserId });
       setActiveMenuUserId(null);
     }
   };
 
-  const handleKickMember = (targetUserId: string, username: string) => {
+  const handleKickMember = async (targetUserId: string, username: string) => {
     if (!isCurrentHost) return;
-    if (confirm(`REMOVE ${username.toUpperCase()} FROM THE ROOM?`)) {
+    const ok = await confirm({
+      title: "REMOVE MEMBER",
+      message: `REMOVE ${username.toUpperCase()} FROM THIS ROOM?`,
+      variant: "danger",
+      confirmLabel: "REMOVE MEMBER",
+      cancelLabel: "CANCEL",
+    });
+    if (ok) {
       const socket = getSocketInstance();
       socket?.emit("kick_member", { user_id: targetUserId });
       setActiveMenuUserId(null);
@@ -200,7 +216,7 @@ export default function MemberList({ onClose, isDrawer = false, className = "", 
                         gap: "4px",
                       }}>
                         <button
-                          onClick={() => handleTransferHost(member.user_id)}
+                          onClick={() => handleTransferHost(member.user_id, member.username)}
                           className="btn btn-ghost"
                           style={{ justifyContent: "flex-start", fontSize: "11px", padding: "8px 10px", minHeight: "44px", width: "100%" }}
                         >

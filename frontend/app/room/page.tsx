@@ -24,6 +24,7 @@ import ModeSelector from "@/components/ModeSelector";
 import QueuePanel from "@/components/QueuePanel";
 import FloatingReactions from "@/components/FloatingReactions";
 import { REACTION_ITEMS } from "@/lib/reactions";
+import { useConfirm } from "@/components/ConfirmModal";
 import api from "@/lib/api";
 
 type MobileTab = "player" | "chat" | "members" | "queue";
@@ -32,6 +33,7 @@ function RoomContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomId = searchParams.get("id");
+  const confirm = useConfirm();
 
   const { token, userId, isAuthenticated } = useAuthStore();
   const {
@@ -66,16 +68,24 @@ function RoomContent() {
   const [memberDrawerOpen, setMemberDrawerOpen] = useState(false);
   const [reactionPopoverOpen, setReactionPopoverOpen] = useState(false);
   const [isLandscapePhone, setIsLandscapePhone] = useState(false);
+  const [isDesktopLayout, setIsDesktopLayout] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isHost = userId === hostId;
 
-  // Track viewport orientation for landscape phone detection (667x375) and dynamic height
+  // Track viewport orientation and desktop breakpoint (>= 768px)
   useEffect(() => {
     const handleResize = () => {
       const isLand = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
       setIsLandscapePhone(isLand);
+      setIsDesktopLayout(window.innerWidth >= 768);
       if (playerContainerRef.current && playerContainerRef.current.offsetHeight > 0) {
-        setPlayerHeight(playerContainerRef.current.offsetHeight);
+        const nextH = playerContainerRef.current.offsetHeight;
+        setPlayerHeight((prev) => (Math.abs(prev - nextH) > 1 ? nextH : prev));
       }
     };
     handleResize();
@@ -99,7 +109,8 @@ function RoomContent() {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.contentRect.height > 0) {
-          setPlayerHeight(Math.round(entry.contentRect.height));
+          const nextH = Math.round(entry.contentRect.height);
+          setPlayerHeight((prev) => (Math.abs(prev - nextH) > 1 ? nextH : prev));
         }
       }
     });
@@ -229,8 +240,14 @@ function RoomContent() {
           });
         });
 
-        socket.on("kicked", (data: any) => {
-          alert(data.reason || "You were removed from the room by the host.");
+        socket.on("kicked", async (data: any) => {
+          await confirm({
+            title: "REMOVED FROM ROOM",
+            message: (data.reason || "YOU WERE REMOVED FROM THE ROOM BY THE HOST.").toUpperCase(),
+            variant: "danger",
+            confirmLabel: "OK",
+            cancelLabel: null,
+          });
           cleanupAndLeave();
         });
 
@@ -292,8 +309,14 @@ function RoomContent() {
           addMessage(msg);
         });
 
-        socket.on("room_ended", (data: any) => {
-          alert(data.reason || "Room has been ended.");
+        socket.on("room_ended", async (data: any) => {
+          await confirm({
+            title: "ROOM ENDED",
+            message: (data.reason || "ROOM HAS BEEN ENDED.").toUpperCase(),
+            variant: "danger",
+            confirmLabel: "OK",
+            cancelLabel: null,
+          });
           cleanupAndLeave();
         });
 
@@ -346,9 +369,16 @@ function RoomContent() {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleLeaveRoom = () => {
+  const handleLeaveRoom = async () => {
     if (isHost) {
-      if (confirm("You are the host. Leaving will end the room for everyone. Proceed?")) {
+      const ok = await confirm({
+        title: "END ROOM",
+        message: "END ROOM FOR EVERYONE? THIS CANNOT BE UNDONE.",
+        variant: "danger",
+        confirmLabel: "END ROOM",
+        cancelLabel: "CANCEL",
+      });
+      if (ok) {
         const socket = getSocket(token!, roomId!);
         socket?.emit("end_room", {});
         cleanupAndLeave();
@@ -358,7 +388,7 @@ function RoomContent() {
     }
   };
 
-  if (!isAuthenticated() || !roomId) return null;
+  if (!mounted || !isAuthenticated() || !roomId) return null;
 
   if (loading) {
     return (
@@ -591,8 +621,8 @@ function RoomContent() {
             background: currentSong.mode === "screenshare" ? "#000000" : "var(--bg)",
             padding: "16px",
           }}>
-            {currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />}
-            <FloatingReactions />
+            {isDesktopLayout && (currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />)}
+            {isDesktopLayout && <FloatingReactions />}
           </div>
 
           {/* Desktop/Tablet Bottom Control Bar */}
@@ -694,8 +724,8 @@ function RoomContent() {
             overflow: "hidden",
           }}
         >
-          {currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />}
-          <FloatingReactions />
+          {!isDesktopLayout && (currentSong.mode === "youtube" ? <YouTubePlayer /> : <ScreenShareViewer />)}
+          {!isDesktopLayout && <FloatingReactions />}
         </div>
 
         {/* Active Tab Pane */}

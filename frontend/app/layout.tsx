@@ -7,6 +7,7 @@ export const viewport: Viewport = {
   themeColor: "#0A0A0A",
 };
 import { Archivo_Black, Space_Mono } from "next/font/google";
+import { ModalProvider } from "@/components/ConfirmModal";
 import "./globals.css";
 
 const displayFont = Archivo_Black({
@@ -46,7 +47,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${displayFont.variable} ${monoFont.variable}`} suppressHydrationWarning>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <ModalProvider>{children}</ModalProvider>
+      </body>
     </html>
   );
 }

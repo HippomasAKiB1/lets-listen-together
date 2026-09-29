@@ -82,6 +82,10 @@ export default function YouTubePlayer() {
       mountedRef.current = false;
       clearInterval(interval);
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      try {
+        playerRef.current?.destroy?.();
+        playerRef.current = null;
+      } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -122,7 +126,7 @@ export default function YouTubePlayer() {
               }
               return;
             }
-            if (isHost && !isSyncingRef.current) {
+            if (isHost && !isSyncingRef.current && Date.now() > initialLoadGraceRef.current) {
               const currentSec = playerRef.current?.getCurrentTime?.() || 0;
               const duration = currentSong.duration_seconds || 0;
               // If paused within 1.5s of track completion, it is track completion!
