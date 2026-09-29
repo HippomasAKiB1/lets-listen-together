@@ -31,6 +31,12 @@
   --shadow-hard-sm: 2px 2px 0px #0A0A0A;
   --shadow-hard-lg: 6px 6px 0px #0A0A0A;
   --shadow-hard-white: 4px 4px 0px #FFFFFF;
+
+  /* SAFE AREA INSETS */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 /* ── GLOBAL RESET & NON-NEGOTIABLE HARD-EDGE RULES ── */
@@ -49,6 +55,70 @@ html, body {
   font-family: var(--font-mono, 'Space Mono', 'IBM Plex Mono', monospace);
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
+}
+
+/* ── VIEWPORT DVH WITH 100VH FALLBACK ── */
+.min-h-screen-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.h-screen-dvh {
+  height: 100vh;
+  height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  .lg\:h-screen-dvh {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
+/* ── DETERMINISTIC RESPONSIVE BREAKPOINT CLASSES ── */
+.tablet-only {
+  display: none !important;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tablet-only {
+    display: inline-flex !important;
+  }
+}
+
+.desktop-only {
+  display: none !important;
+}
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: flex !important;
+  }
+  .desktop-only-block {
+    display: block !important;
+  }
+}
+
+.desktop-tablet-flex {
+  display: none !important;
+}
+@media (min-width: 768px) {
+  .desktop-tablet-flex {
+    display: flex !important;
+  }
+}
+
+.mobile-only-flex {
+  display: flex !important;
+}
+@media (min-width: 768px) {
+  .mobile-only-flex {
+    display: none !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .phone-landscape-hide {
+    display: none !important;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -240,12 +310,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-icon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
 }
 
-/* ── INPUTS ── */
+/* ── INPUTS (MIN 16PX ON MOBILE PREVENTS IOS SAFARI AUTO-ZOOM) ── */
 .input {
   width: 100%;
   padding: 12px 14px;
@@ -253,7 +325,7 @@ h1, h2, h3, h4, h5, h6 {
   border: var(--border);
   color: var(--ink);
   font-family: var(--font-mono, monospace);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
   outline: none;
@@ -261,10 +333,20 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-hard-sm);
   transition: box-shadow 80ms ease-out, border-color 80ms ease-out;
 }
+@media (min-width: 768px) {
+  .input {
+    font-size: 14px;
+  }
+}
 .input::placeholder {
   color: var(--muted);
   text-transform: uppercase;
   font-weight: 400;
+}
+
+/* ── SCROLL CONTAINMENT UTILITY ── */
+.scroll-contain {
+  overscroll-behavior: contain;
 }
 .input:focus {
   border: var(--border-thick);
@@ -485,5 +567,44 @@ h1, h2, h3, h4, h5, h6 {
 .reaction-picker-btn:active {
   transform: translate(1px, 1px) scale(0.95);
   box-shadow: none;
+}
+
+/* ── REACTION POPOVER (MOBILE RECTANGULAR POPOVER) ── */
+.reaction-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 100;
+  border-radius: 0 !important;
+  white-space: nowrap;
+}
+
+.reaction-popover-item {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: var(--border-thin);
+  box-shadow: 1px 1px 0px var(--ink);
+  cursor: pointer;
+  border-radius: 0 !important;
+  transition: transform 80ms ease, background-color 80ms ease;
+}
+
+.reaction-popover-item:hover,
+.reaction-popover-item:active {
+  background: var(--accent-alt);
+  transform: scale(1.08);
 }
 

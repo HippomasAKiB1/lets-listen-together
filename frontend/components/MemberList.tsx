@@ -6,7 +6,14 @@ import { useAuthStore } from "@/store/authStore";
 import { getSocketInstance } from "@/lib/socket";
 import SpeakingIndicator from "./SpeakingIndicator";
 
-export default function MemberList() {
+interface MemberListProps {
+  onClose?: () => void;
+  isDrawer?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export default function MemberList({ onClose, isDrawer = false, className = "", style = {} }: MemberListProps) {
   const { members, hostId } = useRoomStore();
   const { userId } = useAuthStore();
   const isCurrentHost = userId === hostId;
@@ -32,33 +39,48 @@ export default function MemberList() {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      borderRight: "var(--border)",
-      background: "var(--surface)",
-      width: "260px",
-      flexShrink: 0,
-      color: "var(--ink)",
-    }}>
+    <div
+      className={`scroll-contain ${className}`}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        borderRight: isDrawer ? "var(--border)" : undefined,
+        background: "var(--surface)",
+        width: isDrawer ? "300px" : undefined,
+        maxWidth: isDrawer ? "85vw" : undefined,
+        color: "var(--ink)",
+        ...style,
+      }}
+    >
       {/* Header Bar */}
       <div style={{
-        padding: "12px 16px",
+        padding: "10px 16px",
         background: "var(--ink)",
         color: "var(--ink-light)",
         borderBottom: "var(--border)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        minHeight: "44px",
       }}>
         <h3 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em" }}>
           MEMBERS ({members.length})
         </h3>
+        {isDrawer && onClose && (
+          <button
+            onClick={onClose}
+            className="btn btn-ghost-dark"
+            style={{ minHeight: "44px", minWidth: "44px", padding: "6px 10px", fontSize: "11px" }}
+            title="CLOSE DRAWER"
+          >
+            ✕ CLOSE
+          </button>
+        )}
       </div>
 
       {/* Members Table-Style Rows */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
         {members.map((member) => {
           const isMemberHost = member.user_id === hostId;
           const isSpeaking = member.is_speaking;
@@ -153,9 +175,10 @@ export default function MemberList() {
                   <div style={{ position: "relative" }}>
                     <button
                       onClick={() => setActiveMenuUserId(isMenuOpen ? null : member.user_id)}
-                      className="btn btn-ghost btn-sm"
-                      style={{ padding: "2px 4px", fontSize: "12px", height: "auto" }}
+                      className="btn btn-ghost"
+                      style={{ minWidth: "44px", minHeight: "44px", padding: "6px", fontSize: "16px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
                       title="MEMBER CONTROLS"
+                      aria-label="Member controls"
                     >
                       ⋮
                     </button>
@@ -169,24 +192,24 @@ export default function MemberList() {
                         background: "var(--surface)",
                         border: "var(--border)",
                         boxShadow: "var(--shadow-hard-sm)",
-                        padding: "2px",
+                        padding: "4px",
                         zIndex: 50,
-                        minWidth: "140px",
+                        minWidth: "150px",
                         display: "flex",
                         flexDirection: "column",
-                        gap: "2px",
+                        gap: "4px",
                       }}>
                         <button
                           onClick={() => handleTransferHost(member.user_id)}
-                          className="btn btn-ghost btn-sm"
-                          style={{ justifyContent: "flex-start", fontSize: "11px", padding: "6px 8px" }}
+                          className="btn btn-ghost"
+                          style={{ justifyContent: "flex-start", fontSize: "11px", padding: "8px 10px", minHeight: "44px", width: "100%" }}
                         >
                           MAKE HOST
                         </button>
                         <button
                           onClick={() => handleKickMember(member.user_id, member.username)}
-                          className="btn btn-ghost btn-sm"
-                          style={{ justifyContent: "flex-start", fontSize: "11px", padding: "6px 8px", color: "var(--error)" }}
+                          className="btn btn-ghost"
+                          style={{ justifyContent: "flex-start", fontSize: "11px", padding: "8px 10px", minHeight: "44px", width: "100%", color: "var(--error)" }}
                         >
                           REMOVE MEMBER
                         </button>

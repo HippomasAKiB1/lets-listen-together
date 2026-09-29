@@ -85,29 +85,40 @@ export default function CreateRoomPage() {
   if (!mounted || !isAuthenticated()) return null;
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--bg)",
-      padding: "24px",
-      position: "relative",
-    }}>
+    <div
+      style={{
+        minHeight: "100dvh",
+        background: "var(--bg)",
+        paddingTop: "calc(20px + var(--safe-top))",
+        paddingBottom: "calc(24px + var(--safe-bottom))",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
+        position: "relative",
+      }}
+      className="flex flex-col items-center justify-start md:justify-center"
+    >
       <div style={{ width: "100%", maxWidth: "480px" }}>
         
         {/* Navigation back */}
         {!createdRoom && (
           <Link
             href="/home"
-            className="btn btn-ghost btn-sm"
-            style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
+            className="btn btn-ghost"
+            style={{
+              marginBottom: "16px",
+              padding: "8px 12px",
+              minHeight: "44px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "12px",
+            }}
           >
             <span>←</span> BACK TO HOME
           </Link>
         )}
 
-        <div className="card" style={{ padding: "32px 28px" }}>
+        <div className="card" style={{ padding: "clamp(20px, 5vw, 32px)" }}>
           {!createdRoom ? (
             <>
               {/* Header inside card */}
@@ -213,7 +224,7 @@ export default function CreateRoomPage() {
                   className="btn btn-primary"
                   disabled={loading}
                   id="create-room-submit"
-                  style={{ width: "100%", marginTop: "6px", padding: "14px" }}
+                  style={{ width: "100%", marginTop: "6px", padding: "14px", minHeight: "48px" }}
                 >
                   {loading ? "CREATING ROOM…" : "CREATE ROOM →"}
                 </button>
@@ -258,11 +269,22 @@ export default function CreateRoomPage() {
                 {createdRoom.invite_code}
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
-                <button onClick={handleCopyCode} className="btn btn-secondary btn-sm">
+              {/* Explicit stacked buttons on mobile, 2-column on sm+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5">
+                <button
+                  onClick={handleCopyCode}
+                  className="btn btn-secondary"
+                  style={{ minHeight: "44px", padding: "10px 14px", width: "100%" }}
+                  id="create-copy-code-btn"
+                >
                   {copiedCode ? "CODE COPIED" : "COPY CODE"}
                 </button>
-                <button onClick={handleCopyLink} className="btn btn-secondary btn-sm">
+                <button
+                  onClick={handleCopyLink}
+                  className="btn btn-secondary"
+                  style={{ minHeight: "44px", padding: "10px 14px", width: "100%" }}
+                  id="create-copy-link-btn"
+                >
                   {copiedLink ? "LINK COPIED" : "COPY INVITE LINK"}
                 </button>
               </div>
@@ -270,7 +292,7 @@ export default function CreateRoomPage() {
               <button
                 onClick={() => router.push(`/room?id=${createdRoom.room_id}`)}
                 className="btn btn-primary"
-                style={{ width: "100%", padding: "14px" }}
+                style={{ width: "100%", padding: "14px", minHeight: "48px" }}
                 id="create-room-enter"
               >
                 ENTER ROOM →

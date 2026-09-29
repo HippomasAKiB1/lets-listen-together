@@ -426,9 +426,10 @@ export default function YouTubePlayer() {
         left: currentSong.video_id ? "auto" : "-9999px",
         opacity: currentSong.video_id ? 1 : 0,
         pointerEvents: currentSong.video_id ? "auto" : "none",
-        width: "100%",
-        maxWidth: "600px",
-        aspectRatio: "16/9",
+        width: "min(100%, calc(38vh * 16 / 9))",
+        maxWidth: "720px",
+        aspectRatio: "16 / 9",
+        marginInline: "auto",
         overflow: "hidden",
         boxShadow: "var(--shadow-hard-lg)",
         border: "var(--border)",
@@ -523,7 +524,7 @@ export default function YouTubePlayer() {
               zIndex: 10,
             }}
           >
-            <button className="btn btn-primary" style={{ padding: "12px 24px", fontSize: "13px" }}>
+            <button className="btn btn-primary" style={{ padding: "12px 24px", minHeight: "44px", fontSize: "13px" }}>
               CLICK TO PLAY AUDIO ▶
             </button>
             <span style={{ fontSize: "11px", color: "var(--accent-alt)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
@@ -536,15 +537,15 @@ export default function YouTubePlayer() {
       {currentSong.video_id ? (
         <div style={{
           width: "100%",
-          maxWidth: "600px",
+          maxWidth: "720px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "16px",
+          gap: "14px",
           background: "var(--surface)",
           border: "var(--border)",
           boxShadow: "var(--shadow-hard)",
-          padding: "20px 24px",
+          padding: "clamp(12px, 2vw, 20px) clamp(14px, 3vw, 24px)",
         }}>
           {/* Track Info */}
           <div style={{ textAlign: "center" }}>
@@ -585,13 +586,13 @@ export default function YouTubePlayer() {
           </div>
 
           {/* Playback & Volume Controls */}
-          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
             {/* Host Previous Track Button */}
             {isHost && (
               <button
                 onClick={handlePrevTrack}
                 className="btn btn-secondary btn-icon"
-                style={{ width: "40px", height: "40px" }}
+                style={{ width: "44px", height: "44px", minWidth: "44px", minHeight: "44px" }}
                 title="PREVIOUS TRACK"
               >
                 <span>⏮</span>
@@ -602,7 +603,7 @@ export default function YouTubePlayer() {
               <button
                 onClick={togglePlayPause}
                 className="btn btn-primary btn-icon"
-                style={{ width: "46px", height: "46px" }}
+                style={{ width: "48px", height: "48px", minWidth: "48px", minHeight: "48px" }}
                 id="player-play-pause"
                 title={currentSong.is_playing ? "PAUSE" : "PLAY"}
               >
@@ -615,7 +616,7 @@ export default function YouTubePlayer() {
                 fontFamily: "var(--font-mono)",
                 fontWeight: 700,
                 background: "var(--bg)",
-                padding: "6px 12px",
+                padding: "8px 12px",
                 border: "var(--border-thin)",
               }}>
                 CONTROLLED BY HOST
@@ -628,8 +629,10 @@ export default function YouTubePlayer() {
                 onClick={handleNextTrack}
                 className="btn btn-secondary btn-icon"
                 style={{
-                  width: "40px",
-                  height: "40px",
+                  width: "44px",
+                  height: "44px",
+                  minWidth: "44px",
+                  minHeight: "44px",
                   opacity: queue.length > 0 ? 1 : 0.6,
                 }}
                 title={queue.length > 0 ? `NEXT: ${queue[0]?.song_title}` : "NEXT TRACK (QUEUE EMPTY)"}

@@ -100,7 +100,7 @@ export default function MusicControls() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsOpen(true)}
             id="music-search-input"
-            style={{ paddingRight: "60px", fontSize: "12px", padding: "10px 12px" }}
+            style={{ paddingRight: "60px", padding: "10px 12px" }}
           />
           {isOpen && results.length > 0 && (
             <button
@@ -112,8 +112,9 @@ export default function MusicControls() {
                 right: "4px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                padding: "2px 6px",
-                fontSize: "10px",
+                padding: "4px 8px",
+                fontSize: "11px",
+                minHeight: "36px",
                 border: "1px solid var(--border)",
                 background: "var(--surface)",
               }}
@@ -122,7 +123,7 @@ export default function MusicControls() {
             </button>
           )}
         </div>
-        <button type="submit" className="btn btn-primary btn-sm" disabled={loading} id="music-search-submit">
+        <button type="submit" className="btn btn-primary btn-sm" disabled={loading} id="music-search-submit" style={{ minHeight: "44px", padding: "0 16px" }}>
           {loading ? "SEARCHING..." : "SEARCH"}
         </button>
       </form>

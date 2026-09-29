@@ -5,7 +5,12 @@ import { useRoomStore } from "@/store/roomStore";
 import { getSocketInstance } from "@/lib/socket";
 import api from "@/lib/api";
 
-export default function ChatPanel() {
+interface ChatPanelProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export default function ChatPanel({ className = "", style = {} }: ChatPanelProps) {
   const { roomId, messages, setMessages } = useRoomStore();
   const [content, setContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -42,25 +47,27 @@ export default function ChatPanel() {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      borderLeft: "var(--border)",
-      background: "var(--surface)",
-      width: "300px",
-      flexShrink: 0,
-      color: "var(--ink)",
-    }}>
+    <div
+      className={`scroll-contain ${className}`}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "var(--surface)",
+        color: "var(--ink)",
+        ...style,
+      }}
+    >
       {/* Header Bar */}
       <div style={{
-        padding: "12px 16px",
+        padding: "10px 16px",
         background: "var(--ink)",
         color: "var(--ink-light)",
         borderBottom: "var(--border)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        minHeight: "44px",
       }}>
         <h3 style={{ fontSize: "12px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.06em" }}>
           CHAT
@@ -139,10 +146,17 @@ export default function ChatPanel() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           maxLength={500}
-          style={{ fontSize: "12px", padding: "8px 10px" }}
+          enterKeyHint="send"
+          autoComplete="off"
+          style={{ minHeight: "44px", padding: "8px 12px" }}
           id="chat-message-input"
         />
-        <button type="submit" className="btn btn-primary btn-sm" id="chat-message-send" style={{ padding: "0 14px" }}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          id="chat-message-send"
+          style={{ padding: "0 16px", minHeight: "44px", minWidth: "60px" }}
+        >
           SEND
         </button>
       </form>

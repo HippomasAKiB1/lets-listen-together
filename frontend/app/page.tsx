@@ -25,43 +25,46 @@ export default function LandingPage() {
   ];
 
   return (
-    <div style={{
-      height: "100dvh",
-      maxHeight: "100dvh",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      background: "var(--bg)",
-      color: "var(--ink)",
-      border: "var(--border)",
-    }}>
-      
+    <div
+      className="min-h-screen-dvh lg:h-screen-dvh flex flex-col overflow-y-auto lg:overflow-hidden"
+      style={{
+        background: "var(--bg)",
+        color: "var(--ink)",
+        border: "var(--border)",
+      }}
+    >
       {/* ── TOP NAV BAR ── */}
       <header style={{
-        height: "56px",
+        minHeight: "56px",
+        height: "auto",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 24px",
+        paddingTop: "var(--safe-top)",
+        paddingBottom: "8px",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
         background: "var(--ink)",
         color: "var(--ink-light)",
         borderBottom: "var(--border)",
         flexShrink: 0,
+        gap: "12px",
+        flexWrap: "wrap",
       }}>
         {/* Left Brand Lockup */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
           <Image
             src="/assets/app-logo-trans.png"
             alt="Tune Together"
-            width={120}
-            height={44}
+            width={110}
+            height={40}
             priority
             className="logo-glow-dark"
-            style={{ height: "44px", width: "auto", objectFit: "contain" }}
+            style={{ height: "40px", width: "auto", objectFit: "contain" }}
           />
           <span style={{
             fontFamily: "var(--font-display)",
-            fontSize: "18px",
+            fontSize: "clamp(15px, 3.5vw, 18px)",
             fontWeight: "900",
             letterSpacing: "0.02em",
             color: "#FFFFFF",
@@ -71,22 +74,37 @@ export default function LandingPage() {
         </Link>
 
         {/* Right Auth Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           {loggedIn ? (
             <>
               <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--accent-alt)", fontWeight: 700 }}>
                 SIGNED IN AS {username}
               </span>
-              <Link href="/home" className="btn btn-secondary btn-sm" id="landing-home-btn">
+              <Link
+                href="/home"
+                className="btn btn-secondary"
+                style={{ minHeight: "44px", padding: "8px 14px", fontSize: "11px" }}
+                id="landing-home-btn"
+              >
                 DASHBOARD →
               </Link>
             </>
           ) : (
             <>
-              <Link href="/login" className="btn btn-ghost-dark btn-sm" id="landing-login-btn">
+              <Link
+                href="/login"
+                className="btn btn-ghost-dark"
+                style={{ minHeight: "44px", padding: "8px 12px", fontSize: "11px" }}
+                id="landing-login-btn"
+              >
                 SIGN IN
               </Link>
-              <Link href="/register" className="btn btn-primary btn-sm" id="landing-register-btn">
+              <Link
+                href="/register"
+                className="btn btn-primary"
+                style={{ minHeight: "44px", padding: "8px 14px", fontSize: "11px" }}
+                id="landing-register-btn"
+              >
                 GET STARTED
               </Link>
             </>
@@ -94,21 +112,15 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── MAIN ONE-SCREEN CONTENT GRID ── */}
-      <main style={{
-        flex: 1,
-        display: "grid",
-        gridTemplateColumns: "1.08fr 0.92fr",
-        minHeight: 0,
-        overflow: "hidden",
-      }}>
+      {/* ── MAIN CONTENT: DESKTOP 2-COLUMN GRID / MOBILE STACKED ── */}
+      <main className="flex-1 flex flex-col lg:grid lg:grid-cols-[1.08fr_0.92fr] min-h-0 lg:overflow-hidden">
         
         {/* LEFT COLUMN: EDITORIAL POSTER HERO */}
         <section style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "24px 32px",
+          padding: "clamp(20px, 4vw, 36px) clamp(16px, 4vw, 32px)",
           borderRight: "var(--border)",
           background: "var(--bg)",
           overflowY: "auto",
@@ -124,27 +136,29 @@ export default function LandingPage() {
               fontSize: "11px",
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
+              gap: "8px",
+              flexWrap: "wrap",
             }}>
               <span>SYNCHRONIZED AUDIO & VIDEO</span>
               <span style={{ color: "var(--accent)" }}>LIVE STREAMING</span>
             </div>
 
             {/* Transparent Hero Logo */}
-            <div style={{ marginBottom: "18px" }}>
+            <div style={{ marginBottom: "16px" }}>
               <Image
                 src="/assets/app-logo-trans.png"
                 alt="Tune Together"
-                width={260}
-                height={96}
+                width={240}
+                height={88}
                 priority
                 className="logo-contrast-light"
-                style={{ height: "96px", width: "auto", objectFit: "contain" }}
+                style={{ height: "clamp(64px, 10vw, 96px)", width: "auto", objectFit: "contain" }}
               />
             </div>
 
             {/* Headline */}
             <h1 style={{
-              fontSize: "clamp(32px, 3.8vw, 54px)",
+              fontSize: "clamp(28px, 5.5vw, 54px)",
               lineHeight: "0.95",
               letterSpacing: "-0.04em",
               marginBottom: "16px",
@@ -177,22 +191,42 @@ export default function LandingPage() {
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "20px" }}>
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               {loggedIn ? (
                 <>
-                  <Link href="/room/create" className="btn btn-primary btn-lg" id="landing-create-cta">
+                  <Link
+                    href="/room/create"
+                    className="btn btn-primary btn-lg"
+                    style={{ minHeight: "48px", textAlign: "center" }}
+                    id="landing-create-cta"
+                  >
                     CREATE ROOM →
                   </Link>
-                  <Link href="/room/join" className="btn btn-outline btn-lg" id="landing-join-cta">
+                  <Link
+                    href="/room/join"
+                    className="btn btn-outline btn-lg"
+                    style={{ minHeight: "48px", textAlign: "center" }}
+                    id="landing-join-cta"
+                  >
                     JOIN ROOM
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/register" className="btn btn-primary btn-lg" id="landing-get-started-cta">
+                  <Link
+                    href="/register"
+                    className="btn btn-primary btn-lg"
+                    style={{ minHeight: "48px", textAlign: "center" }}
+                    id="landing-get-started-cta"
+                  >
                     GET STARTED →
                   </Link>
-                  <Link href="/room/join" className="btn btn-outline btn-lg" id="landing-join-cta">
+                  <Link
+                    href="/room/join"
+                    className="btn btn-outline btn-lg"
+                    style={{ minHeight: "48px", textAlign: "center" }}
+                    id="landing-join-cta"
+                  >
                     JOIN A ROOM
                   </Link>
                 </>
@@ -201,18 +235,12 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom 3 Real Feature Strips */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            border: "var(--border)",
-            background: "var(--ink)",
-            color: "var(--ink-light)",
-          }}>
-            <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 border border-[var(--ink)] bg-[var(--ink)] text-[var(--ink-light)] mt-4">
+            <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)", borderBottom: "var(--border-thin)" }}>
               <span style={{ fontSize: "10px", color: "var(--accent-alt)", display: "block" }}>PLAYBACK</span>
               <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>REAL-TIME SYNC</strong>
             </div>
-            <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)" }}>
+            <div style={{ padding: "10px 12px", borderRight: "var(--border-thin)", borderBottom: "var(--border-thin)" }}>
               <span style={{ fontSize: "10px", color: "var(--accent)", display: "block" }}>AUDIO</span>
               <strong style={{ fontSize: "12px", display: "block", marginTop: "2px" }}>VOICE CHAT</strong>
             </div>
@@ -223,18 +251,44 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: FLAT HARD-BORDERED PURE VISUAL COLOR MOSAIC GRID (100% TEXT-FREE) */}
-        <section style={{
-          display: "grid",
-          gridTemplateColumns: "1.1fr 0.9fr",
-          gridTemplateRows: "1.2fr 0.8fr 1fr",
-          background: "var(--ink)",
-          gap: "2px",
-          overflow: "hidden",
-        }}>
+        {/* MOBILE/TABLET: THIN HORIZONTAL ACCENT STRIP (~56px tall on <768px, ~72px on tablet) */}
+        <div
+          className="lg:hidden grid grid-cols-6 flex-shrink-0"
+          style={{
+            height: "clamp(56px, 8vw, 72px)",
+            borderTop: "var(--border)",
+            borderBottom: "var(--border)",
+            background: "var(--ink)",
+            gap: "2px",
+          }}
+        >
           {mosaicTiles.map((tile, i) => (
             <div
-              key={i}
+              key={`mobile-tile-${i}`}
+              style={{
+                background: tile.bg,
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* DESKTOP (≥1024px): FLAT HARD-BORDERED PURE VISUAL COLOR MOSAIC GRID */}
+        <section
+          className="hidden lg:grid"
+          style={{
+            gridTemplateColumns: "1.1fr 0.9fr",
+            gridTemplateRows: "1.2fr 0.8fr 1fr",
+            background: "var(--ink)",
+            gap: "2px",
+            overflow: "hidden",
+            height: "100%",
+          }}
+        >
+          {mosaicTiles.map((tile, i) => (
+            <div
+              key={`desktop-tile-${i}`}
               style={{
                 background: tile.bg,
                 width: "100%",
@@ -248,19 +302,25 @@ export default function LandingPage() {
 
       {/* ── BOTTOM STATIC FOOTER BAR ── */}
       <footer style={{
-        height: "36px",
+        minHeight: "36px",
+        height: "auto",
         background: "var(--accent-alt)",
         color: "var(--ink)",
         borderTop: "var(--border)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 24px",
+        paddingTop: "6px",
+        paddingBottom: "calc(6px + var(--safe-bottom))",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
         fontSize: "11px",
         fontFamily: "var(--font-mono)",
         fontWeight: "700",
         letterSpacing: "0.04em",
         flexShrink: 0,
+        gap: "12px",
+        flexWrap: "wrap",
       }}>
         <span>TUNE TOGETHER · SYNCHRONIZED AUDIO & VIDEO</span>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -277,16 +337,6 @@ export default function LandingPage() {
                 borderBottom: "2px solid var(--ink)",
                 paddingBottom: "1px",
                 transition: "all 100ms ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--ink)";
-                e.currentTarget.style.color = "var(--accent-alt)";
-                e.currentTarget.style.padding = "2px 6px";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "var(--ink)";
-                e.currentTarget.style.padding = "0";
               }}
             >
               AKIB HASAN PYIL ↗

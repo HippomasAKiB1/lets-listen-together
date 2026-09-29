@@ -42,22 +42,33 @@ function RegisterContent() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--bg)",
-      padding: "24px",
-      position: "relative",
-    }}>
+    <div
+      style={{
+        minHeight: "100dvh",
+        background: "var(--bg)",
+        paddingTop: "calc(20px + var(--safe-top))",
+        paddingBottom: "calc(24px + var(--safe-bottom))",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
+        position: "relative",
+      }}
+      className="flex flex-col items-center justify-start md:justify-center"
+    >
       <div style={{ width: "100%", maxWidth: "440px" }}>
         
         {/* Navigation back to landing */}
         <Link
           href="/"
-          className="btn btn-ghost btn-sm"
-          style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
+          className="btn btn-ghost"
+          style={{
+            marginBottom: "16px",
+            padding: "8px 12px",
+            minHeight: "44px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "12px",
+          }}
           id="register-back-home"
         >
           <span>←</span> BACK TO HOME
@@ -96,7 +107,7 @@ function RegisterContent() {
         </div>
 
         {/* Card */}
-        <div className="card" style={{ padding: "32px 28px" }}>
+        <div className="card" style={{ padding: "clamp(20px, 5vw, 32px)" }}>
           
           {/* Top Bar inside card */}
           <div style={{
@@ -144,6 +155,9 @@ function RegisterContent() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoFocus
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
                 required
                 id="register-username"
               />
@@ -159,6 +173,7 @@ function RegisterContent() {
                 placeholder="AT LEAST 6 CHARACTERS"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 required
                 id="register-password"
               />
@@ -174,6 +189,7 @@ function RegisterContent() {
                 placeholder="REPEAT PASSWORD"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
+                autoComplete="new-password"
                 required
                 id="register-confirm"
               />
@@ -197,7 +213,7 @@ function RegisterContent() {
               className="btn btn-primary"
               disabled={loading}
               id="register-submit"
-              style={{ width: "100%", marginTop: "6px", padding: "14px" }}
+              style={{ width: "100%", marginTop: "6px", padding: "14px", minHeight: "48px" }}
             >
               {loading ? "CREATING PROFILE…" : "CREATE ACCOUNT →"}
             </button>

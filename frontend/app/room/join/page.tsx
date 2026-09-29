@@ -96,27 +96,38 @@ function JoinRoomContent() {
   if (!mounted || !isAuthenticated()) return null;
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--bg)",
-      padding: "24px",
-      position: "relative",
-    }}>
+    <div
+      style={{
+        minHeight: "100dvh",
+        background: "var(--bg)",
+        paddingTop: "calc(20px + var(--safe-top))",
+        paddingBottom: "calc(24px + var(--safe-bottom))",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
+        position: "relative",
+      }}
+      className="flex flex-col items-center justify-start md:justify-center"
+    >
       <div style={{ width: "100%", maxWidth: "440px" }}>
         
         {/* Navigation back */}
         <Link
           href="/home"
-          className="btn btn-ghost btn-sm"
-          style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
+          className="btn btn-ghost"
+          style={{
+            marginBottom: "16px",
+            padding: "8px 12px",
+            minHeight: "44px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "12px",
+          }}
         >
           <span>←</span> BACK TO HOME
         </Link>
 
-        <div className="card" style={{ padding: "32px 28px" }}>
+        <div className="card" style={{ padding: "clamp(20px, 5vw, 32px)" }}>
           {autoJoining && loading ? (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
               <div style={{
@@ -183,6 +194,10 @@ function JoinRoomContent() {
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     maxLength={5}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    enterKeyHint="go"
                     required
                     style={{
                       fontSize: "24px",
@@ -191,6 +206,7 @@ function JoinRoomContent() {
                       textAlign: "center",
                       fontFamily: "var(--font-mono)",
                       background: "var(--bg)",
+                      minHeight: "48px",
                     }}
                     id="join-room-invite-code"
                   />
@@ -207,9 +223,11 @@ function JoinRoomContent() {
                       placeholder="ENTER ROOM PASSWORD"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
                       required={passwordRequired}
                       id="join-room-password"
                       autoFocus={passwordRequired}
+                      style={{ minHeight: "44px" }}
                     />
                   </div>
                 )}
@@ -232,7 +250,7 @@ function JoinRoomContent() {
                   className="btn btn-primary"
                   disabled={loading}
                   id="join-room-submit"
-                  style={{ width: "100%", marginTop: "6px", padding: "14px" }}
+                  style={{ width: "100%", marginTop: "6px", padding: "14px", minHeight: "48px" }}
                 >
                   {loading ? "JOINING ROOM…" : "JOIN ROOM →"}
                 </button>

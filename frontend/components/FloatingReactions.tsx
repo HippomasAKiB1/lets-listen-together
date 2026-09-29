@@ -41,6 +41,7 @@ export default function FloatingReactions() {
             }}
           >
             {item ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={item.src}
                 alt={item.label}
@@ -52,6 +53,7 @@ export default function FloatingReactions() {
                 }}
               />
             ) : r.emoji.startsWith("/") || r.emoji.startsWith("http") ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={r.emoji}
                 alt="Reaction"

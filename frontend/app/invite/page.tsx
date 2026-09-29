@@ -97,22 +97,33 @@ function InviteQueryContent() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--bg)",
-      padding: "24px",
-      position: "relative",
-    }}>
+    <div
+      style={{
+        minHeight: "100dvh",
+        background: "var(--bg)",
+        paddingTop: "calc(20px + var(--safe-top))",
+        paddingBottom: "calc(24px + var(--safe-bottom))",
+        paddingLeft: "calc(16px + var(--safe-left))",
+        paddingRight: "calc(16px + var(--safe-right))",
+        position: "relative",
+      }}
+      className="flex flex-col items-center justify-start md:justify-center"
+    >
       <div style={{ width: "100%", maxWidth: "440px" }}>
         
         {/* Navigation back to landing */}
         <Link
           href="/"
-          className="btn btn-ghost btn-sm"
-          style={{ marginBottom: "16px", paddingLeft: 0, display: "inline-flex", gap: "6px" }}
+          className="btn btn-ghost"
+          style={{
+            marginBottom: "16px",
+            padding: "8px 12px",
+            minHeight: "44px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "12px",
+          }}
           id="invite-back-home"
         >
           <span>←</span> BACK TO HOME
@@ -151,7 +162,7 @@ function InviteQueryContent() {
         </div>
 
         {/* State Card */}
-        <div className="card" style={{ padding: "32px 28px" }}>
+        <div className="card" style={{ padding: "clamp(20px, 5vw, 32px)" }}>
           
           {(status === "checking" || status === "joining") && (
             <div style={{ textAlign: "center", padding: "20px 0" }}>
@@ -223,6 +234,7 @@ function InviteQueryContent() {
                     placeholder="ENTER ROOM PASSWORD"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     autoFocus
                     required
                   />
@@ -244,7 +256,7 @@ function InviteQueryContent() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ width: "100%", padding: "14px", marginTop: "4px" }}
+                  style={{ width: "100%", padding: "14px", marginTop: "4px", minHeight: "48px" }}
                 >
                   ENTER ROOM →
                 </button>
@@ -272,11 +284,11 @@ function InviteQueryContent() {
                 <button
                   onClick={() => handleJoinRoom()}
                   className="btn btn-primary"
-                  style={{ width: "100%" }}
+                  style={{ width: "100%", minHeight: "48px" }}
                 >
                   RETRY JOIN →
                 </button>
-                <Link href="/home" className="btn btn-outline" style={{ width: "100%" }}>
+                <Link href="/home" className="btn btn-outline" style={{ width: "100%", minHeight: "48px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   BACK TO HOME
                 </Link>
               </div>
